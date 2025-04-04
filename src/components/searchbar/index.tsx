@@ -85,17 +85,17 @@ const FloatingSearchBar: React.FC<FloatingSearchBarProps> = ({ searchQuery, setS
                 <button
                     onClick={() => setShowScanner(true)}
                     className="group hidden sm:flex items-center justify-center p-2 rounded-full 
-                    bg-transparent hover:bg-amber-500 transition absolute right-3 sm:right-16"
+                    bg-transparent hover:bg-amber-500 transition absolute right-3 sm:right-26"
                 >
                     <ScanQrCode className="text-white h-6 w-6 transition-colors 
                     group-hover:text-black hover:h-7 hover:w-7" />
                 </button>
 
-                {/* Search Button (Hidden on small screens) */}
+                {/* Search Button (Only for larger screens) */}
                 <button
                     onClick={handleRedirect}
-                    className="hidden md:block absolute right-[-30px] bg-white text-black px-5 
-                    py-2 rounded-full hover:bg-amber-500 hover:px-5.5 hover:py-2.5 transition 
+                    className="hidden md:block absolute right-[12px] bg-white/10 text-white px-5 
+                    py-2 rounded-full hover:bg-amber-500 hover:text-black hover:px-5.5 hover:py-2.5 transition 
                     text-base font-medium cursor-pointer"
                 >
                     Search

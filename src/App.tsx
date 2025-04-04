@@ -14,6 +14,7 @@ import Auth from "./components/authentication/authentication";
 // import AudioPlayer from "./pages/audioPlayer/audioPlayer";
 import { getUsers } from "./actions/users";
 import AudioPlayer from "./pages/audioPlayer/AudioPlayer";
+import ScrollToTop from "./components/scrollTop/scrollTop";
 // import Admin from "./pages/admin/admin";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
 	return (
 		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
 			<Navbar />
+			{/* < ScrollToTop /> */}
 			<Routes>
 				<Route index element={<HomePage />} />
 				<Route path="about" element={<AboutPage />} />

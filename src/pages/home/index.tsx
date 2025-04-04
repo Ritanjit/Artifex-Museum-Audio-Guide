@@ -8,6 +8,9 @@ import Carousel from "@/components/carousel/carousel";
 import LatestNewsBulletin from "@/components/bulletin/bulletin";
 import Collections from "../collections/collections";
 import QRScanner from "@/components/qrScanner/QRScanner";
+import HomeCollections from "../collections/homeCollections";
+import ScrollToTop from "@/components/scrollTop/scrollTop";
+import HomeNewsHighlights from "@/components/bulletin/homeNews";
 
 const HomePage = () => {
   const { isLoggedIn, setIsLoggedIn, isLoggedInLoading } = useAppStore();
@@ -19,8 +22,10 @@ const HomePage = () => {
   return (
     <>
       <Hero06 />
-      <LatestNewsBulletin />
       {/* <Collections /> */}
+      < HomeCollections />
+      {/* <LatestNewsBulletin/> */}
+      < HomeNewsHighlights />
     </>
   );
 };
