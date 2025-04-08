@@ -1,28 +1,23 @@
-// import { useState } from 'react'
-// import Navbar from '../../components/dashboard/dashNav'
-// import Sidebar from '../../components/dashboard/sidebar'
-// import Dashboard from '../../components/dashboard/dashboard'
+// src/pages/admin.tsx
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import AdminSidebar from "../../components/dashboard/sidebar";
+import CollectionsUpload from "../../components/dashboard/upload";
 
-// function Admin() {
-//   const [sidebarOpen, setSidebarOpen] = useState(true)
+const AdminPage = () => {
+  return (
+    <div className="flex h-screen">
+      <AdminSidebar />
+      <div className="flex-1 overflow-y-auto p-6 bg-white">
+        <Routes>
+          <Route path="/admin/upload" element={<CollectionsUpload />} />
+          {/* <Route path="/admin/feedback" element={<Feedback />} />
+          <Route path="/admin/events" element={<Events />} />
+          <Route path="/admin/audio" element={<Audio />} /> */}
+        </Routes>
+      </div>
+    </div>
+  );
+};
 
-//   return (
-//     <div className="flex h-screen bg-gray-50">
-//       {/* Sidebar */}
-//       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      
-//       {/* Content area */}
-//       <div className={`flex-1 flex flex-col overflow-hidden ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
-//         {/* Navbar */}
-//         <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-        
-//         {/* Main content */}
-//         <main className="flex-1 overflow-y-auto p-6">
-//           <Dashboard />
-//         </main>
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default Admin;
+export default AdminPage;

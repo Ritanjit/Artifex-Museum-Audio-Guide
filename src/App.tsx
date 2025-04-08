@@ -15,7 +15,7 @@ import Auth from "./components/authentication/authentication";
 import { getUsers } from "./actions/users";
 import AudioPlayer from "./pages/audioPlayer/AudioPlayer";
 import ScrollToTop from "./components/scrollTop/scrollTop";
-// import Admin from "./pages/admin/admin";
+import AdminPage from "./pages/admin/admin";
 
 function App() {
 
@@ -31,7 +31,7 @@ function App() {
 				<Route path="visit" element={<Visit />} />
 				<Route path="auth" element={<Auth />} />
 				<Route path="/audioplayer" element={<AudioPlayer />} />
-				{/* <Route path="/admin" element={<Admin />} /> */}
+				<Route path="/admin" element={<AdminPage />} />
 				<Route path="QRScanner" element={<QRScanner onClose={function (): void {
 					throw new Error("Function not implemented.");
 				} } />} />
