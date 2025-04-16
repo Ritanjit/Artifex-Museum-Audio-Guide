@@ -1,9 +1,10 @@
-// src/components/HomeNewsHighlights.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { CalendarCheck, Clock, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
 
 const HomeNewsHighlights: React.FC = () => {
+
   const [news] = useState([
     { id: 1, date: "Mar 28", headline: "Rare Ahom Manuscript Discovered in Upper Assam" },
     { id: 2, date: "Mar 26", headline: "New Exhibit: The Ancient Scripts of the Ahom Dynasty" },
@@ -34,14 +35,17 @@ const HomeNewsHighlights: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [news.length]);
 
+  const navigate = useNavigate();
+
   return (
-    <div className="bg-gray-950 text-white py-8 px-4 sm:px-6 lg:px-10 w-full">
+    <div className="py-8 px-4 sm:px-6 lg:px-10 w-full bg-stone-100 dark:bg-black/70 backdrop-blur-md">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* News Headlines */}
-          <div className="bg-gray-900 border border-amber-500 rounded-lg p-6 shadow-lg h-full">
-            <h2 className="text-xl font-semibold text-amber-400 flex items-center gap-2">
-              <Clock className="h-5 w-5 text-amber-500" /> News Headlines
+          <div className="border-2 border-red-900 dark:border-white bg-white dark:bg-white/5 
+          backdrop-blur-lg rounded-2xl p-6 shadow-lg h-full">
+            <h2 className="text-xl font-semibold text-red-900 dark:text-white flex items-center gap-2">
+              <Clock className="h-5 w-5" /> NOTICE BOARD
             </h2>
             <div className="relative overflow-hidden h-52 mt-4" ref={containerRef}>
               <div
@@ -52,9 +56,12 @@ const HomeNewsHighlights: React.FC = () => {
                 }}
               >
                 {news.concat(news).map((item, index) => (
-                  <div key={index} className="flex items-center gap-4 py-2 text-sm sm:text-base text-gray-300">
-                    <div className="bg-amber-500 text-black font-bold px-3 py-1 rounded-md">{item.date}</div>
-                    <span className="hover:text-amber-400 cursor-pointer">{item.headline}</span>
+                  <div
+                    key={index}
+                    className="flex items-center gap-4 py-2 text-sm sm:text-base text-gray-800 dark:text-gray-200"
+                  >
+                    <div className="bg-red-900 text-white font-bold px-3 py-1 rounded-md">{item.date}</div>
+                    <span className="hover:text-red-900 cursor-pointer">{item.headline}</span>
                   </div>
                 ))}
               </div>
@@ -62,21 +69,23 @@ const HomeNewsHighlights: React.FC = () => {
           </div>
 
           {/* Upcoming Events */}
-          <div className="bg-gray-900 border border-amber-500 rounded-lg p-6 shadow-lg h-full flex flex-col justify-between">
+          <div className="border-2 border-red-900 dark:border-white bg-white/80 
+          dark:bg-white/5 backdrop-blur-lg rounded-2xl p-6 shadow-lg h-full flex flex-col justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-amber-400 flex items-center gap-2">
-                <CalendarCheck className="h-5 w-5 text-amber-500" /> Upcoming Events
+              <h2 className="text-xl font-semibold text-red-900 dark:text-white flex items-center gap-2">
+                <CalendarCheck className="h-5 w-5" />  FORTHCOMING EVENTS
               </h2>
               <div className="mt-4 space-y-4">
                 {events.map((event, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-3 text-sm sm:text-base text-gray-300 bg-gray-800 
-                    p-3 rounded-lg shadow-md hover:bg-gray-700 transition"
+                    className="flex items-start gap-3 text-sm sm:text-base text-gray-800 dark:text-gray-200 
+                    bg-gray-100 dark:bg-black/50 p-3 rounded-lg shadow-md 
+                    hover:bg-gray-200 dark:hover:bg-black/60 transition"
                   >
-                    <CalendarCheck className="h-5 w-5 text-amber-500 mt-1" />
+                    <CalendarCheck className="h-5 w-5 text-red-900 dark:text-red-900 mt-1" />
                     <div>
-                      <span className="text-amber-400 font-semibold">{event.date}:</span>
+                      <span className="text-red-900 dark:text-red-900 font-semibold">{event.date}:</span>
                       <span> {event.event}</span>
                     </div>
                   </div>
@@ -86,12 +95,17 @@ const HomeNewsHighlights: React.FC = () => {
 
             {/* View More Button */}
             <div className="mt-6 text-right">
-              <Link
-                to="/events"
-                className="inline-flex items-center gap-2 text-sm sm:text-base font-medium text-amber-400 hover:text-amber-300 transition"
+              <Button
+                variant="ghost"
+                className="inline-flex items-center gap-2 text-sm sm:text-base font-medium text-red-900
+                dark:text-red-400 hover:text-amber-500 dark:hover:text-red-300 transition hover:!bg-transparent"
+                onClick={() => {
+                    navigate("events");
+                    window.scrollTo({ top: 0, behavior: "instant" });
+                }}
               >
                 View More <ArrowRight className="h-4 w-4" />
-              </Link>
+              </Button>
             </div>
           </div>
         </div>

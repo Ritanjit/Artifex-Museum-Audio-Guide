@@ -7,14 +7,14 @@ import horaiLogo from "../../assets/horaiLogo.png";
 import blankLogo from "../../assets/blank.png";
 import { Button } from "../ui/button";
 import { Home, Compass, Layers, Calendar, Info, ScanQrCode } from "lucide-react"; // Icons for bottom navbar
-import QRScanner from "../qrScanner/QRScanner";
 import { useNavigate } from "react-router";
+import { useTheme } from "@/components/theme-provider/theme-provider"
 
 const Navbar = () => {
 
   const navigate = useNavigate();
 
-  const [showScanner, setShowScanner] = useState(false); // State to control QRScanner visibility
+  const { theme, setTheme } = useTheme()
 
   return (
     <>
@@ -22,8 +22,9 @@ const Navbar = () => {
       <nav
         className="fixed z-50 top-8 left-1/2 transform -translate-x-1/2 
         w-[80%] sm:w-[92%] max-w-7xl px-4 sm:px-6 py-3
-        flex justify-between items-center rounded-full border transition-colors
-        bg-white/10 backdrop-blur-3xl text-black dark:text-white"
+        flex justify-between items-center rounded-full border-3 dark:border transition-colors
+        bg-red-900
+        dark:bg-white/10 backdrop-blur-3xl"
       >
         
         {/* Logo - Moves to Center for Small Screens, Left for Larger Screens */}
@@ -33,7 +34,16 @@ const Navbar = () => {
 
         {/* Decorative Logo - Moves to Right for Small Screens */}
         <div className="absolute right-38 sm:right-270 bottom-0 z-50">
-          <img src={horaiLogo} alt="Logo" className="h-20 sm:h-22 w-auto" />
+          <img src={horaiLogo} alt="Logo" className="h-20 sm:h-22 w-auto hover:cursor-pointer" 
+          onClick={() => {
+            if (location.pathname === "/") {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            } else {
+              navigate("/");
+              window.scrollTo({ top: 0, behavior: "instant" });
+            }
+          }}
+          />
         </div>
 
         {/* Desktop Navigation (Visible only on larger screens) */}
@@ -50,9 +60,10 @@ const Navbar = () => {
         <div className="flex items-center space-x-4">
       <Button
         onClick={() => navigate("/auth")} // Navigate to the Auth page
-        className="rounded-full transition-all bg-secondary text-black text-s inset-border-2xl
-        hover:bg-gray-300 dark:bg-secondary backdrop-blur-3xl dark:text-amber-500 dark:hover:bg-secondary/90
-        hover:h-10 hover:w-18"
+        variant={theme === "light" ? "secondary" : "ghost"}
+        className="rounded-full transition-all !text-white text-s inset-border-2xl bg-white/10
+        dark:bg-secondary backdrop-blur-3xl hover:!text-amber-500 dark:hover:bg-secondary/90
+        h-9 w-18 hover:h-10 hover:w-19"
       >
         Login
       </Button>

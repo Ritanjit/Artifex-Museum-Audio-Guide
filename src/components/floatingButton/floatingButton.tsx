@@ -10,24 +10,31 @@ const FloatingQRButton = () => {
     <>
       {/* Floating QR Scanner Button */}
       <div className="fixed bottom-22 right-4 sm:bottom-6 sm:right-8 
-        flex flex-col items-center z-50 group">
-        
+        flex flex-col items-center z-50 group animate-bounce hover:animate-none">
+
         {/* QR Scanner Button */}
         <Button
           onClick={() => setShowScanner(true)}
-          className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-full 
-          bg-gray-950/20 hover:bg-gray-950/30 backdrop-blur-lg border border-amber-500 dark:border-amber-500 
-          transition-all hover:scale-110 hover:border-2"
+          className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-full
+          bg-red-900 hover:bg-red-900 border-1 border-white group-hover:border-amber-500
+          dark:bg-gray-950/20 dark:group-hover:bg-gray-950/30 backdrop-blur-lg dark:border-amber-500 
+          transition-all group-hover:w-30 hover:group-border-2 hover:group-justify-items-start"
         >
           <ScanQrCode
-            className="text-amber-500 h-8 w-8 transition-all"
+            className="text-white group-hover:text-amber-500 dark:text-amber-500 
+            h-8 w-8 group-hover:h-30 group-hover:w-30 transition-all"
           />
+          <span
+            className="hidden group-hover:block transition-all text-amber-500">
+            Scan QR
+          </span>
         </Button>
 
         {/* Floating Text Below Button */}
-        <span className="mt-1 text-xs sm:text-sm font-semibold text-amber-500 group-hover:font-bold transform-all">
+        {/* <span className="mt-1 text-xs sm:text-sm font-semibold text-white group-hover:text-amber-500
+        dark:text-amber-500 group-hover:font-bold transform-all group-hover:hidden transition-all">
           Scan QR
-        </span>
+        </span> */}
       </div>
 
       {/* QR Scanner Popup */}

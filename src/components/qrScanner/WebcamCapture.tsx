@@ -42,13 +42,13 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onScan }) => {
       />
 
       {/* Capture Button */}
-      <button
+      {/* <button
         onClick={capture}
         className="mt-4 bg-amber-500 text-black px-5 py-2 rounded-lg font-semibold 
         hover:bg-amber-600 transition-all shadow-md"
       >
         Capture QR
-      </button>
+      </button> */}
     </div>
   );
 };

@@ -19,13 +19,13 @@ body {
   }
 
   ::-webkit-scrollbar-thumb {
-    background:chocolate; /* Yellow with transparency */
+    background:#7f1d1d; /* Tailwind's red-900 */
     border-radius: 4px;
     transition: background 0.3s ease-in-out;
   }
 
   ::-webkit-scrollbar-track {
-    background:gray; /* Dark track with transparency */
+    background:rgb(255, 223, 223); /* Dark track with transparency */
     backdrop-filter: blur(5px); /* Adds a subtle blur effect */
   }
 
@@ -34,6 +34,17 @@ body {
     background:black; /* Less transparency on hover */
   }
 }
+
+
+/* Dark Mode Scrollbar */
+html.dark ::-webkit-scrollbar-thumb {
+  background: chocolate;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: black;
+}
+
 
 
 @custom-variant dark (&:is(.dark *));

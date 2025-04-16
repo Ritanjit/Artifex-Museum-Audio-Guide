@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import { ThemeProvider } from "@/components/theme-provider/theme-provider"
-import Navbar  from "@/components/navbar/index";
+import Navbar from "@/components/navbar/index";
 import HomePage from "@/pages/home";
 import AboutPage from "@/pages/about";
 import Navbar04Page from "./components/navbar-04/navbar-04";
@@ -34,16 +34,15 @@ function App() {
 				<Route path="/admin" element={<AdminPage />} />
 				<Route path="QRScanner" element={<QRScanner onClose={function (): void {
 					throw new Error("Function not implemented.");
-				} } />} />
+				}} />} />
 				<Route path="collections" element={<Collections />} />
 				<Route path="events" element={<Event />} />
-				<Route path="authentication" element={<Auth />} />
 			</Routes>
 			<FloatingQRButton />
 			{/* <Navbar04Page /> */}
 			<Footer />
 		</ThemeProvider>
-		
+
 	);
 }
 

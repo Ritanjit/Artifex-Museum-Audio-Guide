@@ -8,9 +8,10 @@ import Carousel from "@/components/carousel/carousel";
 import LatestNewsBulletin from "@/components/bulletin/bulletin";
 import Collections from "../collections/collections";
 import QRScanner from "@/components/qrScanner/QRScanner";
-import HomeCollections from "../collections/homeCollections";
+import HomeCollections from "../../components/collections/homeCollections";
 import ScrollToTop from "@/components/scrollTop/scrollTop";
 import HomeNewsHighlights from "@/components/bulletin/homeNews";
+import { ChevronDown } from "lucide-react";
 
 const HomePage = () => {
   const { isLoggedIn, setIsLoggedIn, isLoggedInLoading } = useAppStore();
@@ -26,6 +27,7 @@ const HomePage = () => {
       < HomeCollections />
       {/* <LatestNewsBulletin/> */}
       < HomeNewsHighlights />
+      
     </>
   );
 };

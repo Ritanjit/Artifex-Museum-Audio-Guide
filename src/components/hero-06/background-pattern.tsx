@@ -6,52 +6,113 @@ import { cn } from "@/lib/utils";
 import heroBg from "../../assets/landingBg.png";
 import heroImage from "../../assets/trad.jpg";
 import bg from "../../assets/herobg.jpg";
-import { useTheme } from "@/components/theme-provider/theme-provider"
+import samoguriBg from "../../assets/samoguribg2.jpg";
+import plain from "../../assets/plain.png";
+import vid from "../../assets/majuli1.mp4";
+import { useTheme } from "@/components/theme-provider/theme-provider";
+import { ChevronDown } from "lucide-react";
+import HeroSlider from "./slider";
 
 export const BackgroundPattern = () => {
   const { theme } = useTheme();
-  // const isLightTheme = resolvedTheme === "light";
 
   return (
     <>
+      {theme === "dark" && (
+        <div
+          className="absolute inset-0 h-screen bg-cover bg-center opacity-50"
+          style={{ backgroundImage: `url(${bg})` }}
+        ></div>
+      )}
 
-      {/* <DotPattern
-        width={20}
-        height={20}
-        cx={1}
-        cy={1}
-        cr={1}
-        className={cn(
-          "[mask-image:radial-gradient(ellipse,rgba(0,0,0,0.3)_30%,black_50%)]",
-          "dark:fill-slate-700"
-        )}
-      /> */}
+      {theme === "light" && (
+        <div
+          className="absolute inset-0 h-[320px] bg-fixed bg-cover bg-center opacity-100"
+        // style={{ backgroundImage: `url(${samoguriBg})` }}
+        >
+          <video
+            src={vid}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
 
-        {/* {/* Full Page Background */}
-
-        {theme !== "light" && (
-          <div
-          className="absolute inset-0 bg-cover bg-center opacity-50"
-          style={{ backgroundImage: `url(${bg})` }}>
-          </div>
-        )}
-        {theme !== "dark" && (
-          <div
-          className="absolute inset-0 bg-cover bg-center opacity-10"
-          style={{ backgroundImage: `url(${bg})` }}>
-          </div>
-        )}
-      
       <Particles
-        className="absolute inset-0"
-        quantity={150}
+        className="absolute inset-0 h-[500px]"
+        quantity={theme == "light" ? 0 : 150}
         ease={80}
         size={1}
-        // color={isLightTheme ? "#FFFF00" : "#FFFF00"}
-        color="#1D1714"
+        color={theme === "light" ? "#8B0000" : "#1D1714"}
         refresh
       />
-
     </>
   );
 };
+
+
+
+
+// "use client";
+
+// import DotPattern from "@/components/ui/dot-pattern";
+// import Particles from "@/components/ui/particles";
+// import { cn } from "@/lib/utils";
+// import heroBg from "../../assets/landingBg.png";
+// import heroImage from "../../assets/trad.jpg";
+// import bg from "../../assets/herobg.jpg";
+// import samoguriBg from "../../assets/samoguribg2.jpg"
+// import plain from "../../assets/plain.png";
+// import vid from "../../assets/majuli1.mp4";
+// import { useTheme } from "@/components/theme-provider/theme-provider";
+// import { ChevronDown } from "lucide-react";
+// import HeroSlider from "./slider";
+
+// export const BackgroundPattern = () => {
+//   const { theme } = useTheme();
+
+//   return (
+//     <>
+//       {theme === "dark" && (
+//         <div
+//           className="absolute inset-0 bg-cover bg-center opacity-50"
+//           style={{ backgroundImage: `url(${bg})` }}
+//         ></div>
+//       )}
+
+//       {theme === "light" && (
+//         <div className="absolute inset-0 bg-fixed bg-cover bg-center opacity-100"
+//           style={{ backgroundImage: `url(${samoguriBg})` }}>
+//           {/* <video
+//             src={vid}
+//             autoPlay
+//             loop
+//             muted
+//             playsInline
+//             className="w-full h-full object-cover"
+//           /> */}
+//         </div>
+//       )}
+
+//       <Particles
+//         className="absolute inset-0"
+//         quantity={theme == "light" ? 0 : 150}
+//         ease={80}
+//         size={1}
+//         color={theme === "light" ? "#8B0000" : "#1D1714"}
+//         refresh
+//       />
+
+// {/* 👇 Animated Scroll Down Arrow */}
+// <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 z-50">
+//   <ChevronDown
+//     className="animate-bounce text-white dark:text-amber-500 h-8 w-8"
+//     strokeWidth={2}
+//   />
+// </div>
+//     </>
+//   );
+// };

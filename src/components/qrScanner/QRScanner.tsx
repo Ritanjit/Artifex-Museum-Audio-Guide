@@ -3,21 +3,19 @@ import WebcamCapture from "./WebcamCapture";
 import jsQR from "jsqr";
 
 interface QRScannerProps {
-  onClose: () => void; // Prop to close the modal
+  onClose: () => void;
 }
 
 const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [isValidUrl, setIsValidUrl] = useState<boolean>(false);
 
-  // Handle QR code scanning from WebcamCapture
   const handleScan = (imageSrc: string | null) => {
     if (imageSrc) {
       decodeQRCode(imageSrc);
     }
   };
 
-  // Handle QR code scanning from uploaded images
   const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -31,7 +29,6 @@ const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
     }
   };
 
-  // Decode QR code from an image source
   const decodeQRCode = (imageSrc: string) => {
     const image = new Image();
     image.src = imageSrc;
@@ -57,7 +54,6 @@ const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
     };
   };
 
-  // Function to check if the QR code content is a valid URL
   const isValidWebsite = (text: string): boolean => {
     try {
       const url = new URL(text);
@@ -68,20 +64,23 @@ const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
       {/* Modal Container */}
-      <div className="bg-gray-950 text-white rounded-xl shadow-lg p-6 w-full max-w-md relative m-4">
+      <div
+        className="rounded-2xl p-6 w-full max-w-md relative m-4 shadow-xl border-4
+        bg-stone-200 dark:bg-white/5 border-red-900 dark:border-none dark:border-white
+        backdrop-blur-lg transition-all duration-300"
+      >
         {/* Close Button */}
-<button
-  onClick={onClose}
-  className="absolute top-3 right-3 bg-gray-800 text-white rounded-full w-8 h-8 flex 
-  items-center justify-center hover:bg-red-600 transition"
->
-  ✕
-</button>
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 bg-red-900 dark:bg-gray-800 text-white rounded-full w-8 h-8 flex 
+            items-center justify-center hover:bg-red-700 dark:hover:bg-red-600 transition"
+        >
+          ✕
+        </button>
 
-
-        <h1 className="text-2xl font-bold text-white mb-4 text-center">QR Scanner</h1>
+        <h1 className="text-2xl font-bold mb-4 text-center text-black dark:text-white">QR Scanner</h1>
 
         {/* Webcam Scanner */}
         <WebcamCapture onScan={handleScan} />
@@ -90,10 +89,11 @@ const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
         <div className="mt-4">
           <label
             htmlFor="qr-upload"
-            className="block w-full text-center bg-gray-800 border border-gray-600 text-white 
-            py-2 rounded-lg cursor-pointer hover:bg-gray-700 transition font-medium"
+            className="block w-full text-center bg-red-900 dark:bg-gray-800 border border-gray-400 dark:border-gray-600 
+            text-white dark:text-white py-1 rounded-lg cursor-pointer hover:bg-amber-600
+            dark:hover:bg-gray-700 transition font-medium"
           >
-            Upload QR Code Image
+            Upload QR Code
           </label>
           <input
             id="qr-upload"
@@ -118,10 +118,10 @@ const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
             href={qrCode}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 bg-amber-500 text-black px-4 py-2 rounded-lg 
+            className="mt-4 bg-red-900 text-white px-4 py-2 rounded-lg 
             hover:bg-amber-600 transition block text-center font-semibold"
           >
-            Go to Website
+            Visit the Artifact Page!
           </a>
         )}
       </div>

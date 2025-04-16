@@ -1,3 +1,4 @@
+import CollectionsBanner from "@/components/collections/collectionsBanner";
 import FloatingSearchBar from "@/components/searchbar";
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
@@ -39,7 +40,7 @@ const Collections: React.FC = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const initialSearchQuery = params.get("search") || "";
-  
+
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [showAll, setShowAll] = useState<{ [key: string]: boolean }>({});
   const [error, setError] = useState(false);
@@ -54,29 +55,27 @@ const Collections: React.FC = () => {
     navigate(`/collections?search=${encodeURIComponent(searchQuery)}`);
   };
 
-  // Filter collections based on search query
   const filteredCollections = collectionsData
     .map((collection) => {
       const filteredItems = collection.items.filter((item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      return {
-        ...collection,
-        items: filteredItems,
-      };
+      return { ...collection, items: filteredItems };
     })
     .filter((collection) => collection.items.length > 0);
 
   return (
-    <div className="bg-black min-h-screen text-white items-center pb-15 pt-25">
-      {/* Search Bar */}
-      <FloatingSearchBar 
+    <div className="bg-stone-100 dark:bg-black min-h-screen text-red-900 dark:text-white pb-15">
+
+      <CollectionsBanner />
+
+      <FloatingSearchBar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         handleSearch={handleSearch}
+        showPrompt={true}
       />
 
-      {/* Error Message Tooltip */}
       {error && (
         <div className="flex justify-center mt-2">
           <div className="bg-red-500 text-white text-sm px-3 py-2 rounded shadow-md">
@@ -85,52 +84,57 @@ const Collections: React.FC = () => {
         </div>
       )}
 
-      {/* Collections Section */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {filteredCollections.length > 0 ? (
           filteredCollections.map((section) => {
             const isExpanded = showAll[section.title] || false;
-            const displayedItems = isExpanded ? section.items : section.items.slice(0, 4);
+            const displayedItems = isExpanded ? section.items : section.items.slice(0, 5);
 
             return (
               <section key={section.title} className="mt-10">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl sm:text-2xl font-semibold">{section.title}</h2>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-3xl font-bold">{section.title}</h2>
                   {section.items.length > 4 && (
-                    <span
-                      className="text-gray-400 cursor-pointer text-sm hover:text-white transition"
+                    <button
                       onClick={() =>
-                        setShowAll((prev) => ({ ...prev, [section.title]: !isExpanded }))
+                        setShowAll((prev) => ({
+                          ...prev,
+                          [section.title]: !isExpanded,
+                        }))
                       }
+                      className="text-lg font-bold text-red-900 hover:text-amber-500 dark:text-gray-300 
+                      dark:hover:text-white underline"
                     >
-                      {isExpanded ? "Show less" : "Show all"}
-                    </span>
+                      {isExpanded ? "Show Less" : "Show All"}
+                    </button>
                   )}
                 </div>
 
-                {/* Responsive Grid Layout */}
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
                   {displayedItems.map((item) => (
                     <Link to="/audioplayer" key={item.name} className="block">
-                      <div className="relative group rounded-3xl overflow-hidden w-full h-[250px] sm:h-[300px] md:h-[350px] shadow-md 
-                      hover:shadow-lg transition duration-500">
-                        
-                        {/* Image with Zoom Effect */}
+                      <div className="relative group rounded-2xl overflow-hidden w-full h-[280px] sm:h-[300px] 
+                      md:h-[340px] shadow-md hover:shadow-lg transition duration-500">
                         <img
                           src={item.src}
                           alt={item.name}
-                          className="rounded-2xl object-cover w-full h-full transition-all 
-                          duration-500 ease-in-out transform group-hover:scale-110"
+                          className="rounded-xl object-cover w-full h-full transition-all duration-500 ease-in-out 
+                          transform group-hover:scale-105"
                         />
-
-                        {/* Text Overlay */}
-                        <div className="absolute z-10 bottom-3 left-0 mx-3 p-3 bg-white/60 backdrop-blur-lg w-[calc(100%-24px)] 
-                          rounded-xl shadow-sm shadow-transparent transition-all duration-500 
-                          group-hover:shadow-indigo-200 group-hover:bg-amber-500">
-                          <h6 className="font-semibold text-base leading-7 text-black text-center">
+                        <div
+                          className="absolute z-10 bottom-3 left-0 mx-2 p-2 bg-red-900 dark:bg-white/60 
+                          backdrop-blur-lg w-[calc(100%-16px)] border border-white dark:border-black 
+                          rounded-lg shadow-sm shadow-transparent transition-all duration-500 
+                          group-hover:shadow-indigo-200 dark:group-hover:bg-amber-500"
+                        >
+                          <h6 className="font-semibold text-sm leading-6 text-white group-hover:text-amber-500 
+                          dark:text-black text-center">
                             {item.name}
                           </h6>
-                          <p className="text-xs leading-5 text-gray-800 text-center">Mukha Collections</p>
+                          <p className="text-xs leading-5 text-gray-200 dark:text-gray-800 text-center 
+                          group-hover:text-amber-500/80">
+                            Satra Collections
+                          </p>
                         </div>
                       </div>
                     </Link>
