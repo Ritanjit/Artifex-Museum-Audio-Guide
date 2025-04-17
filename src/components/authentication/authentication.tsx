@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { FaApple, FaGoogle, FaXTwitter } from "react-icons/fa6";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import { login } from "../../actions/users";
+import { useEffect } from "react";
 import SamaguriEntrance from "../../assets/samaguri entrance.jpg";
 import horai from "../../assets/horai.png";
 import vid from "../../assets/majuli1.mp4";
@@ -8,6 +9,21 @@ import vid from "../../assets/majuli1.mp4";
 const Auth: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"signup" | "login">("login");
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleLogin = async () => {
+
+    const res = await login();
+
+    if (res?.id) {
+      setMessage("🎉 Logged in successfully!");
+      // Optionally, you can store the user in localStorage or state
+    } else {
+      setMessage("❌ Login failed. Invalid credentials.");
+    }
+  };
 
   return (
     <div className="h-screen flex items-center justify-center bg-stone-100 text-red-950">
@@ -52,6 +68,8 @@ const Auth: React.FC = () => {
 
             {/* Form fields */}
             <div className="w-full max-w-xs space-y-4">
+
+              {/* Username */}
               {activeTab === "signup" && (
                 <input
                   type="text"
@@ -59,15 +77,23 @@ const Auth: React.FC = () => {
                   className="w-full border border-red-900 rounded-lg p-3 text-sm focus:outline-none"
                 />
               )}
+
+              {/* Email */}
               <input
                 type="email"
                 placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full border border-red-900 rounded-lg p-3 text-sm focus:outline-none"
               />
+
+              {/* password */}
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full border border-red-900 rounded-lg p-3 text-sm focus:outline-none"
                 />
                 <button
@@ -95,8 +121,8 @@ const Auth: React.FC = () => {
                     className="absolute right-3 top-1/2 transform -translate-y-1/2"
                   >
                     {showPassword ?
-                    <FiEyeOff size={18} className="text-red-900" /> :
-                    <FiEye size={18} className="text-red-900" />}
+                      <FiEyeOff size={18} className="text-red-900" /> :
+                      <FiEye size={18} className="text-red-900" />}
                   </button>
                 </div>
               )}
@@ -106,10 +132,21 @@ const Auth: React.FC = () => {
                 <label htmlFor="remember">Remember me</label>
               </div>
 
-              <button className="bg-red-900 text-white py-3 rounded-lg text-sm w-full 
-              hover:bg-red-800 transition-all cursor-pointer">
+              <button
+                className="bg-red-900 text-white py-3 rounded-lg text-sm w-full 
+                hover:bg-red-800 transition-all cursor-pointer"
+                onClick={handleLogin}
+              >
                 {activeTab === "signup" ? "Let's Start" : "Log In"}
               </button>
+
+              {/* Show Message */}
+              {message && (
+                <div className="text-sm text-center text-red-900 font-semibold">
+                  {message}
+                </div>
+              )}
+
             </div>
           </div>
         </div>

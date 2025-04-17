@@ -12,7 +12,7 @@ import QRScanner from "./components/qrScanner/QRScanner";
 import FloatingQRButton from "./components/floatingButton/floatingButton";
 import Auth from "./components/authentication/authentication";
 // import AudioPlayer from "./pages/audioPlayer/audioPlayer";
-import { getUsers } from "./actions/users";
+import { login, getUsers } from "./actions/users";
 import AudioPlayer from "./pages/audioPlayer/AudioPlayer";
 import ScrollToTop from "./components/scrollTop/scrollTop";
 import AdminPage from "./pages/admin/admin";
@@ -20,6 +20,8 @@ import AdminPage from "./pages/admin/admin";
 function App() {
 
 	getUsers();
+
+	login();
 
 	return (
 		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">

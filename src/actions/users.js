@@ -1,18 +1,17 @@
 import Api from "@/apis/Api";
 
-export async function authUser({ email, password }) {
-	try {
-		const response = await Api.post(`/artifex-users`, {
-			fields: `id,email,password,created_at`,
-			body: { email, password },
-		});
+export async function login() {
+	const response = await Api.post("/auth-artifex-users", { // users can be replaced with any name of the collection
+		body: {
+			username: "john",
+			password: "password",
+		},
+		fields: "id,name,email,role",
+	});
 
-		return response;
-	} catch (error) {
-		console.error("Login failed:", error);
-		return { error: "Invalid credentials" };
-	}
-}
+	return response;
+};
+
 
 export async function getUsers(search = "", page = "1,1000", sort = "-created_at") {
 	const response = await Api.get("/artifex-catalogue", {
