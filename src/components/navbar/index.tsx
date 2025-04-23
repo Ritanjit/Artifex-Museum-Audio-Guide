@@ -26,7 +26,7 @@ const Navbar = () => {
         bg-red-900
         dark:bg-white/10 backdrop-blur-3xl"
       >
-        
+
         {/* Logo - Moves to Center for Small Screens, Left for Larger Screens */}
         <div className="flex items-center">
           <img src={blankLogo} alt="blankLogo" className="h-10 w-30 rounded-full" />
@@ -34,15 +34,15 @@ const Navbar = () => {
 
         {/* Decorative Logo - Moves to Right for Small Screens */}
         <div className="absolute right-38 sm:right-270 bottom-0 z-50">
-          <img src={horaiLogo} alt="Logo" className="h-20 sm:h-22 w-auto hover:cursor-pointer" 
-          onClick={() => {
-            if (location.pathname === "/") {
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            } else {
-              navigate("/");
-              window.scrollTo({ top: 0, behavior: "instant" });
-            }
-          }}
+          <img src={horaiLogo} alt="Logo" className="h-20 sm:h-22 w-auto hover:cursor-pointer"
+            onClick={() => {
+              if (location.pathname === "/") {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              } else {
+                navigate("/");
+                window.scrollTo({ top: 0, behavior: "instant" });
+              }
+            }}
           />
         </div>
 
@@ -58,29 +58,35 @@ const Navbar = () => {
 
         {/* Right Side - Login & Theme Toggle */}
         <div className="flex items-center space-x-4">
-      <Button
-        onClick={() => navigate("/auth")} // Navigate to the Auth page
-        variant={theme === "light" ? "secondary" : "ghost"}
-        className="rounded-full transition-all !text-white text-s inset-border-2xl bg-white/10
+          <Button
+            onClick={() => navigate("/auth")} // Navigate to the Auth page
+            variant={theme === "light" ? "secondary" : "ghost"}
+            className="rounded-full transition-all !text-white text-s inset-border-2xl bg-white/10
         dark:bg-secondary backdrop-blur-3xl hover:!text-amber-500 dark:hover:bg-secondary/90
         h-9 w-18 hover:h-10 hover:w-19"
-      >
-        Login
-      </Button>
-      <ModeToggle />
-    </div>
+          >
+            Login
+          </Button>
+          <ModeToggle />
+        </div>
       </nav>
-        
+
 
       {/* Bottom Navbar (Mobile Only) */}
-      <div className="fixed z-50 bottom-0 left-0 w-full bg-white/10 backdrop-blur-lg 
-        text-amber-500 dark:text-white border-t border-gray-300 dark:border-gray-700 
-        md:hidden flex justify-around py-3">
-        <NavItem href="/" icon={<Home size={24} className="text-amber-500" />} label="Home" />
-        <NavItem href="/visit" icon={<Compass size={24} className="text-amber-500" />} label="Visit" />
-        <NavItem href="/collections" icon={<Layers size={24} className="text-amber-500" />} label="Collections" />
-        <NavItem href="/events" icon={<Calendar size={24} className="text-amber-500" />} label="Event" />
-        <NavItem href="/about" icon={<Info size={24} className="text-amber-500" />} label="About Us" />
+      <div
+        className={`
+          fixed z-50 bottom-0 left-0 w-full
+          ${theme === "light" ? 
+          "bg-red-900 border-t-1 border-white" : 
+          "bg-white/10 border-t border-gray-300 dark:border-gray-700"}
+          backdrop-blur-lg md:hidden flex justify-around py-3
+        `}
+      >
+        <NavItem href="/" icon={<Home size={24} />} label="Home"/>
+        <NavItem href="/visit" icon={<Compass size={24} />} label="Visit"/>
+        <NavItem href="/collections" icon={<Layers size={24} />} label="Collections"/>
+        <NavItem href="/events" icon={<Calendar size={24} />} label="Event"/>
+        <NavItem href="/about" icon={<Info size={24} />} label="About Us"/>
       </div>
 
 
@@ -105,8 +111,7 @@ const NavLink = ({ href, label }: { href: string; label: string }) => {
 
 const NavItem = ({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) => {
   return (
-    <a href={href} className="flex flex-col items-center text-gray-500 
-    hover:text-yellow-400 transition">
+    <a href={href} className="flex flex-col items-center text-white transition-all">
       {icon}
       <span className="text-xs mt-1">{label}</span>
     </a>

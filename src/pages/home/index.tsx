@@ -12,6 +12,7 @@ import HomeCollections from "../../components/collections/homeCollections";
 import ScrollToTop from "@/components/scrollTop/scrollTop";
 import HomeNewsHighlights from "@/components/bulletin/homeNews";
 import { ChevronDown } from "lucide-react";
+import IntroInfoCard from "@/components/Introduction/intro";
 
 const HomePage = () => {
   const { isLoggedIn, setIsLoggedIn, isLoggedInLoading } = useAppStore();
@@ -23,9 +24,8 @@ const HomePage = () => {
   return (
     <>
       <Hero06 />
-      {/* <Collections /> */}
+      < IntroInfoCard />
       < HomeCollections />
-      {/* <LatestNewsBulletin/> */}
       < HomeNewsHighlights />
       
     </>

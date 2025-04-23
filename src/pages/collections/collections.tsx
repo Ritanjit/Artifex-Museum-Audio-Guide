@@ -91,7 +91,7 @@ const Collections: React.FC = () => {
             const displayedItems = isExpanded ? section.items : section.items.slice(0, 5);
 
             return (
-              <section key={section.title} className="mt-10">
+              <section key={section.title} className="mt-10 fade-in">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-3xl font-bold">{section.title}</h2>
                   {section.items.length > 4 && (

@@ -10,7 +10,7 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="z-50 bg-red-950 dark:bg-neutral-900 pt-10 pb-5">
-      <div className="container mx-auto px-20">
+      <div className="container mx-auto px-6 sm:px-12 md:px-20">
 
         {/* Top Section */}
         <div className="flex flex-col md:flex-row justify-center items-center md:items-start gap-8 sm:gap-40">
@@ -88,7 +88,7 @@ export const Footer: React.FC = () => {
         <div className="border-t border-white dark:border-gray-700 my-6"></div>
 
         {/* Copyright Section */}
-        <div className="text-center text-white dark:text-gray-400 text-sm pb-10 sm:pb-0">
+        <div className="text-center text-white dark:text-gray-400 text-sm pb-15 sm:pb-0">
           © {new Date().getFullYear()} Artifex. All rights reserved by Artifex & Co.
         </div>
       </div>

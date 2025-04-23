@@ -1,0 +1,44 @@
+.scroll-container {
+    scroll-behavior: smooth;
+    overflow-x: auto;
+    display: flex;
+    padding-bottom: 10px;
+    scroll-snap-type: x mandatory;
+}
+
+.scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+.slider-nav {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    /* Adjust as needed */
+    height: 40px;
+    /* Adjust as needed */
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffffff;
+    /* Tailwind red-900 */
+    background-color: rgba(157, 27, 27, 0.9);
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-btn:hover {
+    background-color: #f59e0b;
+    /* Tailwind amber-500 */
+    color: white;
+}

@@ -6,8 +6,7 @@ import { cn } from "@/lib/utils";
 import heroBg from "../../assets/landingBg.png";
 import heroImage from "../../assets/trad.jpg";
 import bg from "../../assets/herobg.jpg";
-import samoguriBg from "../../assets/samoguribg2.jpg";
-import plain from "../../assets/plain.png";
+import mukhBg from '../../assets/bhaunaBg.webp'
 import vid from "../../assets/majuli1.mp4";
 import { useTheme } from "@/components/theme-provider/theme-provider";
 import { ChevronDown } from "lucide-react";
@@ -42,13 +41,23 @@ export const BackgroundPattern = () => {
       )}
 
       <Particles
-        className="absolute inset-0 h-[500px]"
+        className="absolute inset-0 h-screen"
         quantity={theme == "light" ? 0 : 150}
         ease={80}
         size={1}
         color={theme === "light" ? "#8B0000" : "#1D1714"}
-        refresh
+        refresh={true}
+        staticity={50}
       />
+
+      {/* 👇 Animated Scroll Down Arrow */}
+      <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 z-50">
+        {theme == 'dark' && <ChevronDown
+          className="animate-bounce text-white h-8 w-8"
+          strokeWidth={2}
+        />}
+      </div>
+
     </>
   );
 };

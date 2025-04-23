@@ -15,24 +15,24 @@ body {
 
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
-    width: 4px; /* Adjust width as needed */
+    width: 4px;
+    /* Adjust width as needed */
   }
 
   ::-webkit-scrollbar-thumb {
-    background:#7f1d1d; /* Tailwind's red-900 */
+    background: #7f1d1d;
+    /* Tailwind's red-900 */
     border-radius: 4px;
     transition: background 0.3s ease-in-out;
   }
 
   ::-webkit-scrollbar-track {
-    background:rgb(255, 223, 223); /* Dark track with transparency */
-    backdrop-filter: blur(5px); /* Adds a subtle blur effect */
+    background: rgb(255, 223, 223);
+    /* Dark track with transparency */
+    backdrop-filter: blur(5px);
+    /* Adds a subtle blur effect */
   }
 
-  /* Optional: Hover Effect */
-  ::-webkit-scrollbar-thumb:hover {
-    background:black; /* Less transparency on hover */
-  }
 }
 
 
@@ -43,6 +43,23 @@ html.dark ::-webkit-scrollbar-thumb {
 
 html.dark ::-webkit-scrollbar-thumb:hover {
   background: black;
+}
+
+/* fade in custom animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.8s ease-out both;
 }
 
 

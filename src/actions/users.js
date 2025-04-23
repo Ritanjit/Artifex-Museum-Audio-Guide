@@ -1,16 +1,21 @@
 import Api from "@/apis/Api";
 
-export async function login() {
-	const response = await Api.post("/auth-artifex-users", { // users can be replaced with any name of the collection
+export async function login({ email, password }) {
+	const response = await Api.post("/auth-artifex-users", {
 		body: {
-			username: "john",
-			password: "password",
+			email: email,
+			password: password,
 		},
-		fields: "id,name,email,role",
+		fields: "id,email",
+		headers: {
+			app: "s5_intern_database",
+			token: "czVfaW50ZXJuX2RhdGFiYXNlLDE3NDQ5MDI1MTU1NTg6TVhob09USnE=", // Your actual token
+		},
 	});
 
+	console.log("Auth status: ", response);
 	return response;
-};
+}
 
 
 export async function getUsers(search = "", page = "1,1000", sort = "-created_at") {

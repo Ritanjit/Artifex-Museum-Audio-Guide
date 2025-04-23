@@ -5,29 +5,50 @@ import { useEffect } from "react";
 import SamaguriEntrance from "../../assets/samaguri entrance.jpg";
 import horai from "../../assets/horai.png";
 import vid from "../../assets/majuli1.mp4";
+import { useNavigate } from "react-router";
+import './auth.css'
 
 const Auth: React.FC = () => {
+
   const [activeTab, setActiveTab] = useState<"signup" | "login">("login");
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+  const [redirecting, setRedirecting] = useState(false);
+
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      setMessage("Please enter email and password ❗");
+      return;
+    }
 
-    const res = await login();
+    try {
+      const res = await login({ email, password });
 
-    if (res?.id) {
-      setMessage("🎉 Logged in successfully!");
-      // Optionally, you can store the user in localStorage or state
-    } else {
-      setMessage("❌ Login failed. Invalid credentials.");
+      if (!res.err) {
+        setMessage("Logged in successfully 🎉");
+
+        // Redirect after 2 seconds
+        setRedirecting(true); // to show spinner
+        setTimeout(() => {
+          navigate("/admin");
+        }, 1000);
+      } else {
+        setMessage("❌ Login failed! Invalid credentials. ");
+      }
+    } catch (err) {
+      setMessage("Something went wrong. Try again :(");
+      console.error("Login Error:", err);
     }
   };
 
   return (
     <div className="h-screen flex items-center justify-center bg-stone-100 text-red-950">
       <div className="w-full h-full flex flex-col lg:flex-row-reverse">
+
         {/* Right Section */}
         <div className="lg:w-1/2 xl:w-5/12 flex flex-col justify-center 
         bg-white shadow-lg h-full pt-28">
@@ -102,8 +123,8 @@ const Auth: React.FC = () => {
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
                 >
                   {showPassword ?
-                    <FiEyeOff size={18} className="text-red-900" /> :
-                    <FiEye size={18} className="text-red-900" />}
+                    <FiEye size={18} className="text-red-900" /> :
+                    <FiEyeOff size={18} className="text-red-900" />}
                 </button>
               </div>
 
@@ -121,8 +142,8 @@ const Auth: React.FC = () => {
                     className="absolute right-3 top-1/2 transform -translate-y-1/2"
                   >
                     {showPassword ?
-                      <FiEyeOff size={18} className="text-red-900" /> :
-                      <FiEye size={18} className="text-red-900" />}
+                      <FiEye size={18} className="text-red-900" /> :
+                      <FiEyeOff size={18} className="text-red-900" />}
                   </button>
                 </div>
               )}
@@ -143,7 +164,17 @@ const Auth: React.FC = () => {
               {/* Show Message */}
               {message && (
                 <div className="text-sm text-center text-red-900 font-semibold">
+
                   {message}
+
+                  {redirecting && (
+                    <div className="mt-2 flex flex-col items-center">
+                      <div className="spinner border-4 border-t-4 border-t-amber-500 border-gray-300 
+                      rounded-full w-8 h-8 animate-spin"></div>
+                      <p className="text-sm text-gray-500 mt-1">Redirecting to admin page...</p>
+                    </div>
+                  )}
+
                 </div>
               )}
 
@@ -160,15 +191,18 @@ const Auth: React.FC = () => {
         //   backgroundPosition: "center",
         // }}
         />
-        <video
-          src={vid}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-[900px] h-full object-cover"
-        />
+        <div>
+          <video
+            src={vid}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-[900px] h-full object-cover fadeIn"
+          />
+        </div>
       </div>
+
     </div>
   );
 };

@@ -38,12 +38,12 @@ const HomeNewsHighlights: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="py-8 px-4 sm:px-6 lg:px-10 w-full bg-stone-100 dark:bg-black/70 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto">
+    <div className="px-4 sm:px-6 lg:px-10 w-full bg-stone-100 dark:bg-black/70 backdrop-blur-md py-20">
+      <div className="max-w-[1330px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* News Headlines */}
           <div className="border-2 border-red-900 dark:border-white bg-white dark:bg-white/5 
-          backdrop-blur-lg rounded-2xl p-6 shadow-lg h-full">
+          backdrop-blur-lg rounded-2xl p-6 shadow-lg h-full fade-in">
             <h2 className="text-xl font-semibold text-red-900 dark:text-white flex items-center gap-2">
               <Clock className="h-5 w-5" /> NOTICE BOARD
             </h2>
@@ -70,7 +70,8 @@ const HomeNewsHighlights: React.FC = () => {
 
           {/* Upcoming Events */}
           <div className="border-2 border-red-900 dark:border-white bg-white/80 
-          dark:bg-white/5 backdrop-blur-lg rounded-2xl p-6 shadow-lg h-full flex flex-col justify-between">
+          dark:bg-white/5 backdrop-blur-lg rounded-2xl p-6 shadow-lg 
+          h-full flex flex-col justify-between fade-in">
             <div>
               <h2 className="text-xl font-semibold text-red-900 dark:text-white flex items-center gap-2">
                 <CalendarCheck className="h-5 w-5" />  FORTHCOMING EVENTS
@@ -80,7 +81,7 @@ const HomeNewsHighlights: React.FC = () => {
                   <div
                     key={index}
                     className="flex items-start gap-3 text-sm sm:text-base text-gray-800 dark:text-gray-200 
-                    bg-gray-100 dark:bg-black/50 p-3 rounded-lg shadow-md 
+                    bg-gray-100 dark:bg-black/50 p-3 rounded-lg shadow-md cursor-pointer
                     hover:bg-gray-200 dark:hover:bg-black/60 transition"
                   >
                     <CalendarCheck className="h-5 w-5 text-red-900 dark:text-red-900 mt-1" />
@@ -97,7 +98,7 @@ const HomeNewsHighlights: React.FC = () => {
             <div className="mt-6 text-right">
               <Button
                 variant="ghost"
-                className="inline-flex items-center gap-2 text-sm sm:text-base font-medium text-red-900
+                className="inline-flex items-center gap-2 text-sm sm:text-base font-medium text-red-900 cursor-pointer
                 dark:text-red-400 hover:text-amber-500 dark:hover:text-red-300 transition hover:!bg-transparent"
                 onClick={() => {
                     navigate("events");

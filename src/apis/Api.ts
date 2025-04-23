@@ -1,16 +1,28 @@
-import axios, { AxiosRequestConfig } from "axios";
-import { Buffer } from "buffer";
+// s5_intern_database
 
-export const _DATABASE = "s5_intern_database";
-export const _BASE_URL = "https://v5.frontql.dev";
-const local_host = "http://localhost:4466";
+import axios, { AxiosRequestConfig } from "axios";
 import tokens from "./tokens.json";
 
 interface Tokens {
-	[key: string]: string;
+	[key: string]: string | false;
 }
 
-const typedTokens: Tokens = tokens;
+// Base64 encoding characters
+const base64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+function toBase64(num: number): string {
+	let result = "";
+	const str = num.toString();
+	for (let i = 0; i < str.length; i++) {
+		const charCode = parseInt(str[i]);
+		result += base64chars[charCode % 64];
+	}
+	return result;
+}
+
+export const _DATABASE = "s5_intern_database"
+export const _BASE_URL = "https://v5.frontql.dev"
+const local_host = "http://localhost:4466"
 
 type HttpMethod = "get" | "post" | "put" | "delete" | "sql";
 
@@ -42,14 +54,14 @@ function uniqueKey(input: string) {
 		code &= code;
 	}
 
-	return Buffer.from(code.toString()).toString("base64").substring(0, 8);
+	return toBase64(Math.abs(code)).substring(0, 8);
 }
 
 function getKey(method: HttpMethod, url: string, options: RequestOptions) {
+	if (!local_host) throw new Error("local_host is not defined");
 	const _url = local_host + url;
 	const parsed_url = new URL(_url);
-	// const pathname = parsed_url.pathname;
-	const pathname = "/" + parsed_url.pathname.split("/")[1];
+	const pathname = parsed_url.pathname;
 
 	const request: any = {
 		fields: options?.fields,
@@ -64,7 +76,7 @@ function getKey(method: HttpMethod, url: string, options: RequestOptions) {
 	request["body_is_array"] = Array.isArray(options.body || {});
 
 	let tokenStr = pathname;
-	for (const key in request) {
+	for (let key in request) {
 		if (request[key]) {
 			tokenStr += key + ":" + request[key];
 		}
@@ -96,13 +108,13 @@ const makeRequest = async (method: HttpMethod, endpoint: string, options: Reques
 	if (filter) headers.filter = filter;
 	if (fields) headers.fields = fields;
 	if (session) headers.session = session;
+	if (nearby) headers.nearby = nearby;
 	if (joins) headers.collections = joins;
 	if (validation) headers.validation = validation;
 	if (permissions) headers.permissions = permissions;
-	if (nearby) headers.nearby = nearby;
 
 	const key = getKey(method, endpoint, options);
-	const token = typedTokens[key] || false;
+	const token = (tokens as Tokens)[key] || false;
 
 	if (!token) {
 		headers["key"] = key;

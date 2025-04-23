@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ScanQrCode } from "lucide-react"; // QR Icon
 import QRScanner from "../qrScanner/QRScanner";
 import { Button } from "../ui/button"; // Consistent button component
+import './floatingButton.css'
 
 const FloatingQRButton = () => {
   const [showScanner, setShowScanner] = useState(false);
@@ -10,7 +11,7 @@ const FloatingQRButton = () => {
     <>
       {/* Floating QR Scanner Button */}
       <div className="fixed bottom-22 right-4 sm:bottom-6 sm:right-8 
-        flex flex-col items-center z-50 group animate-bounce hover:animate-none">
+        flex flex-col items-center z-50 group bounce-temporary">
 
         {/* QR Scanner Button */}
         <Button
@@ -18,7 +19,7 @@ const FloatingQRButton = () => {
           className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-full
           bg-red-900 hover:bg-red-900 border-1 border-white group-hover:border-amber-500
           dark:bg-gray-950/20 dark:group-hover:bg-gray-950/30 backdrop-blur-lg dark:border-amber-500 
-          transition-all group-hover:w-30 hover:group-border-2 hover:group-justify-items-start"
+          transition-all group-hover:w-30 hover:group-border-2 hover:group-justify-items-start "
         >
           <ScanQrCode
             className="text-white group-hover:text-amber-500 dark:text-amber-500 

@@ -1,12 +1,14 @@
+// To run server --> open terminal in root folder --> bun src/apis/server.js
+
 import { serve, file, write } from "bun";
 
 const port = 4466;
 const hostname = "v5.frontql.dev";
-const basicAuth = "Basic czVfaW50ZXJuX2RhdGFiYXNlLDE3NDM2OTAzODQ4NDY6TVdod2RqUmo=";
+const basicAuth = "Basic czVfaW50ZXJuX2RhdGFiYXNlLDE3NDUzMjU1MzM5MjM6TVc1NU5ESmg=";  // regenerates after 24hrs
 
 
 
-const tokensPath = "./tokens.json";
+const tokensPath = "src/apis/tokens.json";
 
 const CORS_HEADERS = {
 	headers: {
