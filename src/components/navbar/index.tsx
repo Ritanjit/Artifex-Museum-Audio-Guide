@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { ModeToggle } from "@/components/theme-provider/mode-toggle";
-import logo1 from "../../assets/logo-light.png";
-import samaguriLogo from "../../assets/sl1.png";
-import samaguriLogo1 from "../../assets/sl2.png";
 import horaiLogo from "../../assets/horaiLogo.png";
 import blankLogo from "../../assets/blank.png";
 import { Button } from "../ui/button";
 import { Home, Compass, Layers, Calendar, Info, ScanQrCode } from "lucide-react"; // Icons for bottom navbar
 import { useNavigate } from "react-router";
 import { useTheme } from "@/components/theme-provider/theme-provider"
+import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
 
@@ -16,15 +14,16 @@ const Navbar = () => {
 
   const { theme, setTheme } = useTheme()
 
+  const location = useLocation();
+
   return (
     <>
       {/* Top Navbar */}
       <nav
-        className="fixed z-50 top-8 left-1/2 transform -translate-x-1/2 
+        className="absolute sm:fixed z-50 top-8 left-1/2 transform -translate-x-1/2 
         w-[80%] sm:w-[92%] max-w-7xl px-4 sm:px-6 py-3
         flex justify-between items-center rounded-full border-3 dark:border transition-colors
-        bg-red-900
-        dark:bg-white/10 backdrop-blur-3xl"
+        bg-red-900 dark:bg-white/10 backdrop-blur-3xl"
       >
 
         {/* Logo - Moves to Center for Small Screens, Left for Larger Screens */}
@@ -76,17 +75,17 @@ const Navbar = () => {
       <div
         className={`
           fixed z-50 bottom-0 left-0 w-full
-          ${theme === "light" ? 
-          "bg-red-900 border-t-1 border-white" : 
-          "bg-white/10 border-t border-gray-300 dark:border-gray-700"}
+          ${theme === "light" ?
+            "bg-red-900 border-t-1 border-white" :
+            "bg-white/10 border-t border-gray-300 dark:border-gray-700"}
           backdrop-blur-lg md:hidden flex justify-around py-3
         `}
       >
-        <NavItem href="/" icon={<Home size={24} />} label="Home"/>
-        <NavItem href="/visit" icon={<Compass size={24} />} label="Visit"/>
-        <NavItem href="/collections" icon={<Layers size={24} />} label="Collections"/>
-        <NavItem href="/events" icon={<Calendar size={24} />} label="Event"/>
-        <NavItem href="/about" icon={<Info size={24} />} label="About Us"/>
+        <NavItem href="/" icon={<Home size={24} />} label="Home" />
+        <NavItem href="/visit" icon={<Compass size={24} />} label="Visit" />
+        <NavItem href="/collections" icon={<Layers size={24} />} label="Collections" />
+        <NavItem href="/events" icon={<Calendar size={24} />} label="Event" />
+        <NavItem href="/about" icon={<Info size={24} />} label="About Us" />
       </div>
 
 
@@ -95,13 +94,20 @@ const Navbar = () => {
 };
 
 const NavLink = ({ href, label }: { href: string; label: string }) => {
+  
+  const location = useLocation();
+  const isActive = location.pathname === href;
+
   return (
-    <li className="relative group text-white font-semibold font-sans
-    hover:text-amber-500 hover:text-lg transition-all">
+    <li
+      className={`relative group font-semibold font-sans transition-all 
+      ${isActive ? "text-amber-500 text-lg" : "text-white hover:text-amber-500 hover:text-lg"}`}
+    >
       <a href={href} className="px-3 py-2">{label}</a>
-      {/* Hover effect with dot and underline */}
-      <span className="absolute left-1/2 transform -translate-x-1/2 bottom-[-6px] flex items-center 
-      gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <span className={`absolute left-1/2 transform -translate-x-1/2 bottom-[-6px] 
+      flex items-center gap-1 transition-opacity duration-300 
+      ${isActive ? "opacity-0" : "opacity-0 group-hover:opacity-100"   // add group-hover:opacity-100 to show underline on hover
+      }`}>
         <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
         <span className="w-6 h-1 bg-amber-500 rounded"></span>
       </span>
@@ -110,12 +116,24 @@ const NavLink = ({ href, label }: { href: string; label: string }) => {
 };
 
 const NavItem = ({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) => {
+  
+  const location = useLocation();
+  const isActive = location.pathname === href;
+
   return (
-    <a href={href} className="flex flex-col items-center text-white transition-all">
+    <a
+      href={href}
+      className={`flex flex-col items-center transition-all ${
+        isActive
+          ? "text-amber-500 font-bold"
+          : "text-white hover:text-amber-500"
+      }`}
+    >
       {icon}
       <span className="text-xs mt-1">{label}</span>
     </a>
   );
 };
+
 
 export default Navbar;

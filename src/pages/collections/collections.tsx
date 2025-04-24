@@ -69,12 +69,15 @@ const Collections: React.FC = () => {
 
       <CollectionsBanner />
 
-      <FloatingSearchBar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        handleSearch={handleSearch}
-        showPrompt={true}
-      />
+      <div className="mt-20">
+        <FloatingSearchBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          handleSearch={handleSearch}
+          showPrompt={true}
+        />
+      </div>
+
 
       {error && (
         <div className="flex justify-center mt-2">
@@ -91,7 +94,7 @@ const Collections: React.FC = () => {
             const displayedItems = isExpanded ? section.items : section.items.slice(0, 5);
 
             return (
-              <section key={section.title} className="mt-10 fade-in">
+              <section key={section.title} className="mt-25 fade-in">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-3xl font-bold">{section.title}</h2>
                   {section.items.length > 4 && (

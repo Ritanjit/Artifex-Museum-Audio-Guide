@@ -10,7 +10,7 @@ const AudioPlayer = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [volume, setVolume] = useState(0.7);
+    const [volume, setVolume] = useState(1);
     const [language, setLanguage] = useState('english');
     const audioRef = useRef(null);
 

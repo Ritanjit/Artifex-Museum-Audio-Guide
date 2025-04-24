@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import heroBg from "../../assets/landingBg.png";
 import heroImage from "../../assets/trad.jpg";
 import bg from "../../assets/herobg.jpg";
-import mukhBg from '../../assets/bhaunaBg.webp'
+import majuliBg from '../../assets/majuliDark.jpg'
 import vid from "../../assets/majuli1.mp4";
 import { useTheme } from "@/components/theme-provider/theme-provider";
 import { ChevronDown } from "lucide-react";
@@ -20,7 +20,7 @@ export const BackgroundPattern = () => {
       {theme === "dark" && (
         <div
           className="absolute inset-0 h-screen bg-cover bg-center opacity-50"
-          style={{ backgroundImage: `url(${bg})` }}
+          style={{ backgroundImage: `url(${majuliBg})` }}
         ></div>
       )}
 

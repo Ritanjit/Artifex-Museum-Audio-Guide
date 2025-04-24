@@ -9,7 +9,7 @@ const RootLayout: React.FC = () => {
 		<>
 			<Navbar />
 			<main className="min-h-screen">
-				<Outlet />
+				<Outlet /> {/* 👈 This is essential for rendering nested routes */}
 			</main>
 			<FloatingQRButton />
 			<Footer />

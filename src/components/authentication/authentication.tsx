@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { login } from "../../actions/users";
+import { login, signup } from "../../actions/users";
 import { useEffect } from "react";
 import SamaguriEntrance from "../../assets/samaguri entrance.jpg";
 import horai from "../../assets/horai.png";
@@ -17,8 +17,20 @@ const Auth: React.FC = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
   const [redirecting, setRedirecting] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // to save email address to local storage
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
 
+  // login handler function
   const handleLogin = async () => {
     if (!email || !password) {
       setMessage("Please enter email and password ❗");
@@ -28,8 +40,15 @@ const Auth: React.FC = () => {
     try {
       const res = await login({ email, password });
 
-      if (!res.err) {
+      if (!res.err || (email==='admin@gmail.com' && password==='123')) {  // or statement for local use --> remove when deploying
         setMessage("Logged in successfully 🎉");
+
+        // save email in browser cache to remember it next time
+        if (rememberMe) {
+          localStorage.setItem("rememberedEmail", email);
+        } else {
+          localStorage.removeItem("rememberedEmail");
+        }
 
         // Redirect after 2 seconds
         setRedirecting(true); // to show spinner
@@ -45,13 +64,40 @@ const Auth: React.FC = () => {
     }
   };
 
+  // sign up handler function
+  const handleSignup = async () => {
+    if (!email || !password || !confirmPassword) {
+      setMessage("All fields are required ❗");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setMessage("Passwords do not match ❗");
+      return;
+    }
+
+    try {
+      const res = await signup({ email, password });
+
+      if (!res.err) {
+        setMessage("Account created successfully 🎉 You can now log in.");
+        setActiveTab("login");
+      } else {
+        setMessage("❌ Signup failed. Try another email.");
+      }
+    } catch (err) {
+      setMessage("Something went wrong during signup.");
+      console.error("Signup Error:", err);
+    }
+  };
+
   return (
     <div className="h-screen flex items-center justify-center bg-stone-100 text-red-950">
       <div className="w-full h-full flex flex-col lg:flex-row-reverse">
 
         {/* Right Section */}
         <div className="lg:w-1/2 xl:w-5/12 flex flex-col justify-center 
-        bg-white shadow-lg h-full pt-28">
+        bg-white shadow-lg h-full pt-10">
           <div className="flex justify-center mb-6">
             <img src={horai} alt="Logo" className="w-20 h-auto" />
           </div>
@@ -60,18 +106,20 @@ const Auth: React.FC = () => {
           <div className="flex justify-center space-x-6 mb-5">
             <button
               onClick={() => setActiveTab("login")}
-              className={`py-3 px-12.5 rounded-lg font-semibold text-sm cursor-pointer ${activeTab === "login"
-                ? "bg-red-900 text-white"
-                : "border-2 border-red-900 text-red-900"
+              className={`py-3 px-12.5 rounded-lg font-semibold text-sm cursor-pointer 
+                ${activeTab === "login" ?
+                  "bg-red-900 text-white" :
+                  "border-2 border-red-900 text-red-900"
                 }`}
             >
               Log In
             </button>
             <button
               onClick={() => setActiveTab("signup")}
-              className={`py-3 px-12.5 rounded-lg font-semibold text-sm cursor-pointer ${activeTab === "signup"
-                ? "bg-red-900 text-white"
-                : "border-2 border-red-900 text-red-900"
+              className={`py-3 px-12.5 rounded-lg font-semibold text-sm cursor-pointer 
+                ${activeTab === "signup" ?
+                  "bg-red-900 text-white" :
+                  "border-2 border-red-900 text-red-900"
                 }`}
             >
               Sign Up
@@ -134,6 +182,8 @@ const Auth: React.FC = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full border border-red-900 rounded-lg p-3 text-sm focus:outline-none"
                   />
                   <button
@@ -149,14 +199,21 @@ const Auth: React.FC = () => {
               )}
 
               <div className="flex items-center space-x-2 text-sm">
-                <input type="checkbox" id="remember" className="accent-red-800 mt-1 cursor-pointer" />
+                <input
+                  type="checkbox"
+                  id="remember"
+                  className="accent-red-800 sm:mt-1 cursor-pointer"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
                 <label htmlFor="remember">Remember me</label>
               </div>
+
 
               <button
                 className="bg-red-900 text-white py-3 rounded-lg text-sm w-full 
                 hover:bg-red-800 transition-all cursor-pointer"
-                onClick={handleLogin}
+                onClick={activeTab === "login" ? handleLogin : handleSignup}
               >
                 {activeTab === "signup" ? "Let's Start" : "Log In"}
               </button>

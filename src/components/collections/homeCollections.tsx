@@ -137,20 +137,21 @@ const HomeCollections: React.FC = () => {
 
   return (
     <div className="relative z-10 bg-white text-red-900 dark:bg-black 
-    dark:text-white pt-20 pb-10 px-6 sm:px-16 lg:px-24">
+  dark:text-white pt-20 pb-10 px-4 sm:px-6 lg:px-24">
       {collectionsData.map((section) => (
         <div key={section.title} className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-5xl font-bold">{section.title}</h2>
+          <div className="flex flex-row sm:flex-row sm:justify-between sm:items-center mb-6 gap-24 
+          sm:gap-0 text-center sm:text-left">
+            <h2 className="text-4xl sm:text-5xl font-bold">{section.title}</h2>
             <button
               onClick={() => {
                 navigate("/collections");
                 window.scrollTo({ top: 0, behavior: "instant" });
               }}
-              className="text-lg mt-8 font-bold text-red-900 hover:text-amber-500 
+              className="text-sm sm:text-lg pr-2 sm:pr-0 mt-6 sm:mt-8 font-bold text-red-900 hover:text-amber-500 
                 dark:text-gray-300 dark:hover:text-white underline cursor-pointer"
             >
-              Explore All
+              View More
             </button>
           </div>
 
@@ -199,7 +200,7 @@ const HomeCollections: React.FC = () => {
           </div>
 
           {/* Navigation Arrows */}
-          <div className="slider-nav">
+          <div className="slider-nav mt-4 flex justify-end gap-2 sm:gap-4 px-35 sm:px-1">
             <button className="nav-btn left pb-1" onClick={() => scroll("left")}>
               ⇽
             </button>
@@ -207,6 +208,7 @@ const HomeCollections: React.FC = () => {
               ⇾
             </button>
           </div>
+
 
         </div>
       ))}

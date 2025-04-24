@@ -1,5 +1,6 @@
 import Api from "@/apis/Api";
 
+// login api
 export async function login({ email, password }) {
 	const response = await Api.post("/auth-artifex-users", {
 		body: {
@@ -7,13 +8,32 @@ export async function login({ email, password }) {
 			password: password,
 		},
 		fields: "id,email",
-		headers: {
-			app: "s5_intern_database",
-			token: "czVfaW50ZXJuX2RhdGFiYXNlLDE3NDQ5MDI1MTU1NTg6TVhob09USnE=", // Your actual token
-		},
+		// headers: {
+		// 	app: "s5_intern_database",
+		// 	token: "czVfaW50ZXJuX2RhdGFiYXNlLDE3NDQ5MDI1MTU1NTg6TVhob09USnE=", // Your actual token
+		// },
 	});
 
 	console.log("Auth status: ", response);
+	return response;
+}
+
+// sign up api
+export async function signup({email, password }) {
+	const response = await Api.post("/auth-artifex-users", {
+		body: {
+			// username,
+			email,
+			password,
+		},
+		fields: "id,password,email",
+		// headers: {
+		// 	app: "s5_intern_database",
+		// 	token: "czVfaW50ZXJuX2RhdGFiYXNlLDE3NDQ5MDI1MTU1NTg6TVhob09USnE=",
+		// },
+	});
+
+	console.log("Signup response: ", response);
 	return response;
 }
 

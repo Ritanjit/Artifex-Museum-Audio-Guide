@@ -29,7 +29,7 @@ const IntroInfoCard: React.FC = () => {
                                 to="/mukha"
                                 className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-red-900 
                                 text-white font-semibold hover:bg-amber-500 hover:text-white 
-                                transition-all duration-300 shadow-md hover:scale-101"
+                                transition-all duration-300 shadow-md hover:scale-101 text-xs sm:text-[15px]"
                                 onClick={() => {
                                     window.scrollTo({ top: 0, behavior: "instant" });
                                 }}

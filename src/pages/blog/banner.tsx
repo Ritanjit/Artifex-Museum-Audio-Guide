@@ -1,38 +1,36 @@
 import { useState } from "react";
 import { useTheme } from "@/components/theme-provider/theme-provider";
-import FloatingSearchBar from "@/components/searchbar";
-import vid from "@/assets/majuli1.mp4";
 import banner from "../../assets/Mukkhas-Banner.jpg";
-import maskBg from "../../assets/maskBg.jpg";
-
 
 const Banner = () => {
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState("");
 
     return (
-        <div className="relative z-30 min-h-[320px] overflow-visible flex flex-col 
-        items-center justify-center px-4 sm:px-6 mb-10">
-            {theme === "light" && (
-                <div className="absolute inset-0 h-[320px] bg-cover bg-center opacity-100"
-                    style={{ backgroundImage: `url(${banner})` }}
-                ></div>
-            )}
+        <div
+            className="relative z-30 min-h-[220px] sm:min-h-[320px] overflow-visible flex flex-col 
+            items-center justify-center px-4 sm:px-6 mb-10"
+        >
+            {/* Background Image for Light and Dark Modes */}
+            <div
+                className={`absolute inset-0 w-full bg-cover bg-center ${theme === "light" ? "opacity-100" : "opacity-50"
+                    }`}
+                style={{
+                    backgroundImage: `url(${banner})`,
+                    height: "100%", // Will respect min-h-[320px] or responsive sm:min-h
+                }}
+            ></div>
 
-            {theme === "dark" && (
-                <div className="absolute inset-0 h-[320px] bg-cover bg-center opacity-50"
-                    style={{ backgroundImage: `url(${banner})` }}
-                ></div>
-            )}
-
-            <div className="relative z-10 text-red-900 dark:text-white text-center w-full max-w-[500px] px-2 sm:px-4 mt-15">
+            {/* Content */}
+            <div className="relative z-10 text-red-900 dark:text-white text-center w-full 
+            max-w-[500px] px-2 sm:px-4 mt-35 mb-10">
                 <h1
-                    className="text-4xl sm:text-5xl font-bold font-serif mt-10"
+                    className="text-3xl sm:text-5xl font-bold font-serif leading-tight"
                 >
                     Mukhas of Majuli
                 </h1>
                 <p
-                    className="text-xl sm:text-2xl font-bold font-sans mt-5"
+                    className="text-base sm:text-2xl font-bold font-sans mt-4 sm:mt-5"
                 >
                     A Gift of Mahapurush Srimanta Sankardev to Assam
                 </p>
