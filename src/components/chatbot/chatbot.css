@@ -1,0 +1,18 @@
+/* Mac-style open/close animation for Chatbot window */
+.chatbot-container {
+    transform-origin: bottom right;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    will-change: transform, opacity;
+    perspective: 1000px;
+}
+
+.chatbot-open {
+    transform: scale(1) rotateX(0deg);
+    opacity: 1;
+}
+
+.chatbot-close {
+    transform: scale(0.85) rotateX(20deg);
+    opacity: 0;
+    pointer-events: none;
+}

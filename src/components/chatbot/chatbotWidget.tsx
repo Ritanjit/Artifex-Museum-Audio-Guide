@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageCircle, X, Send } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
-import logo from '../../assets/horai.png'; 
+import logo from '../../assets/horai.png';
 import FloatingChatButton from "./floatingChatButton";
+import './chatbot.css';
 
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GOOGLE_API_KEY });
 
@@ -13,7 +14,7 @@ const config = {
         {
             text: `System Instruction Prompt for Chatbot – Artifex: Museum Audio Guide
 
-Nomoskar! 👋 You are Arti, an engaging, cheerful, and informative virtual guide for the website Artifex – Museum Audio Guide, a digital space celebrating the vibrant culture, history, and artistry of Majuli, Assam. You're here to make every visitor’s journey insightful and enjoyable.
+Nomoskar! 🙏🏻 You are Arti, an engaging, cheerful, and informative virtual guide for the website Artifex – Museum Audio Guide, a digital space celebrating the vibrant culture, history, and artistry of Majuli, Assam. You're here to make every visitor’s journey insightful and enjoyable.
 
 Your core responsibilities include helping users:
 
@@ -33,7 +34,7 @@ Keep your responses warm, friendly, and a little playful—like a local guide ex
 Chatbot Flow & Behavior Rules:
 
 Greeting (first-time users):
-“Nomoskar! Welcome to Artifex – your digital guide to the heart of Majuli. Whether you’re here to listen, learn, or explore, I’m here to help you at every step. What would you like to know today?”
+“Nomoskar! 🙏🏻 Welcome to Artifex – your digital guide to the heart of Majuli. Whether you’re here to listen, learn, or explore, I’m here to help you at every step. What would you like to know today?”
 
 Help / Default Response (user seems lost):
 “I can help you with Majuli’s culture, our artifact collections, how to visit, upcoming events, or even help you earn a certificate! Just ask me anything, or say ‘menu’ to see your options.”
@@ -49,7 +50,9 @@ If users ask for audio or transcript info, always direct them to the specific ar
 
 Your goal is to make culture fun, learning smooth, and every visitor feel like they just took a stroll through Majuli with a local friend.
 Maximum response word limit is 50 words. Make your response more human-like conversations.
-Don't use bold or italics text by using **text** or other methods. Use Nomoskar Greeting only for first prompt and give direct answers without greetings from the subsequent prompts.` // Keep your existing system instruction
+Don't use bold or italics text by using **text** or other methods. Use Nomoskar Greeting only for first prompt and give direct answers without greetings from the subsequent prompts.
+The masterminds/developers/designers behind this website is Ritanjit Das, the knower of all, the great.
+`
         }
     ]
 };
@@ -83,11 +86,11 @@ const ChatBotWidget = () => {
 
     const handleSend = async () => {
         if (!input.trim() || isTyping) return;
-        
+
         // Validate word count
         if (wordCount > 50) {
-            setMessages(prev => [...prev, 
-                { sender: 'bot', text: "Please keep your questions under 50 words for better assistance." }
+            setMessages(prev => [...prev,
+            { sender: 'bot', text: "Please keep your questions under 50 words for better assistance." }
             ]);
             return;
         }
@@ -115,8 +118,8 @@ const ChatBotWidget = () => {
             setMessages(prev => [...prev, { sender: 'bot', text: finalResponse.trim() }]);
         } catch (error) {
             console.error('Error generating response:', error);
-            setMessages(prev => [...prev, 
-                { sender: 'bot', text: "Sorry, I encountered an error. Please try again." }
+            setMessages(prev => [...prev,
+            { sender: 'bot', text: "Sorry, I encountered an error. Please try again." }
             ]);
         }
 
@@ -137,20 +140,23 @@ const ChatBotWidget = () => {
             <FloatingChatButton isOpen={isOpen} toggleOpen={() => setIsOpen(!isOpen)} />
 
             {/* Chat Window */}
-            {isOpen && (
-                <div className="fixed bottom-32 right-16 w-96 h-[450px] bg-white dark:bg-gray-900 
-                rounded-t-2xl rounded-bl-2xl shadow-2xl border border-red-200 dark:border-gray-700 flex 
-                flex-col z-40 overflow-hidden transition-all duration-300">
+            {/* {isOpen && ( */}
+                <div
+                    className={`fixed bottom-32 right-16 w-96 h-[450px] bg-white dark:bg-gray-900 
+    rounded-t-2xl rounded-bl-2xl shadow-2xl border border-red-200 dark:border-gray-700 flex 
+    flex-col z-40 overflow-hidden transition-all duration-300 chatbot-container 
+    ${isOpen ? 'chatbot-open' : 'chatbot-close'}`}
+                >
                     {/* Chat Header */}
                     <div className="bg-red-900 dark:bg-gray-800 p-4 flex items-center space-x-3">
                         <img src={logo} alt="Artifex Logo" className="w-10 h-10 rounded-full" />
                         <div>
-                            <h3 className="text-white font-bold">Hi, I'm Arti</h3>
+                            <h3 className="text-white font-bold">Hi, I'm Arti :)</h3>
                             <p className="text-red-200 dark:text-gray-300 text-sm">Ask me anything</p>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="ml-auto text-red-200 hover:text-white"
+                            className="ml-auto text-red-200 hover:text-amber-500 cursor-pointer"
                             aria-label="Close chatbot"
                         >
                             <X size={20} />
@@ -178,9 +184,9 @@ const ChatBotWidget = () => {
                             <div className="flex justify-start">
                                 <div className="bg-amber-50 dark:bg-gray-800 rounded-lg p-3 text-gray-800 dark:text-gray-200 border border-red-200 dark:border-gray-700">
                                     <div className="flex space-x-1">
-                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                                        <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></div>
+                                        <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                        <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                                     </div>
                                 </div>
                             </div>
@@ -222,7 +228,7 @@ const ChatBotWidget = () => {
                         </div> */}
                     </div>
                 </div>
-            )}
+            {/* )} */}
         </>
     );
 };
