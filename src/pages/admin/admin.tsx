@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "../../components/dashboard/sidebar";
 import AdminTopbar from "../../components/dashboard/adminTopbar";
+import Dashboard from "@/components/dashboard/dashboard";
 
 const AdminPage = () => {
   return (

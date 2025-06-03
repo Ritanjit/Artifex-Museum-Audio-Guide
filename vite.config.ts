@@ -9,7 +9,7 @@ import basicSsl from '@vitejs/plugin-basic-ssl'
 export default defineConfig({
   server: {
     // use the below two to use https for mobile qr permissions
-    // https: {}, 
+    // https: {},
     // host: true,
     port: 3000,
   },

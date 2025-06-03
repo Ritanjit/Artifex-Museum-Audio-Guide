@@ -1,8 +1,12 @@
 import React from "react";
 import horaiLogo from "../../assets/horaiLogo.png";
 import { useNavigate, useLocation } from "react-router";
+import useVisitCounter from "../visitorCounter/VisitorCounter";
+import VisitorCounter from "../visitorCounter/VisitorCounter";
 
 export const Footer: React.FC = () => {
+
+  const visits = useVisitCounter();
 
   const navigate = useNavigate();
 
@@ -92,6 +96,16 @@ export const Footer: React.FC = () => {
           © {new Date().getFullYear()} Artifex. All rights reserved by Artifex & Co.
         </div>
       </div>
+
+      {/* example visitor counter */}
+      <p className="text-3xl font-semibold text-gray-800 transition duration-300 
+                            group-hover:scale-105">
+        {/* {totalVisitors} */}
+        {visits !== null ? visits.toLocaleString() : "Loading..."}
+      </p>
+
+      <VisitorCounter />
+
     </footer>
   );
 };

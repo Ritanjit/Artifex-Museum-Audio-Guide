@@ -1,3 +1,4 @@
+// src\actions\users.js
 import Api from "@/apis/Api";
 
 // login api
@@ -8,10 +9,6 @@ export async function login({ email, password }) {
 			password: password,
 		},
 		fields: "id,email",
-		// headers: {
-		// 	app: "s5_intern_database",
-		// 	token: "czVfaW50ZXJuX2RhdGFiYXNlLDE3NDQ5MDI1MTU1NTg6TVhob09USnE=", // Your actual token
-		// },
 	});
 
 	console.log("Auth status: ", response);
@@ -19,24 +16,19 @@ export async function login({ email, password }) {
 }
 
 // sign up api
-export async function signup({email, password }) {
-	const response = await Api.post("/auth-artifex-users", {
+export async function signup({ username, email, password }) {
+	const response = await Api.post("/artifex-users", {
 		body: {
-			// username,
+			username,
 			email,
 			password,
 		},
-		fields: "id,password,email",
-		// headers: {
-		// 	app: "s5_intern_database",
-		// 	token: "czVfaW50ZXJuX2RhdGFiYXNlLDE3NDQ5MDI1MTU1NTg6TVhob09USnE=",
-		// },
+		fields: "id,username,email"
 	});
 
-	console.log("Signup response: ", response);
+	console.log('User signup response:', response);
 	return response;
 }
-
 
 export async function getUsers(search = "", page = "1,1000", sort = "-created_at") {
 	const response = await Api.get("/artifex-catalogue", {

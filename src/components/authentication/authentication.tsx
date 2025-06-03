@@ -1,17 +1,19 @@
+
 import React, { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { login, signup } from "../../actions/users";
 import { useEffect } from "react";
-import SamaguriEntrance from "../../assets/samaguri entrance.jpg";
 import horai from "../../assets/horai.png";
 import vid from "../../assets/majuli1.mp4";
 import { useNavigate } from "react-router";
-import './auth.css'
+import { X } from "lucide-react";
+import { useToast } from "../../lib/contexts/ToastContext";
+import FloatingHomeButton from "./floatingHomeButton";
 
 const Auth: React.FC = () => {
-
   const [activeTab, setActiveTab] = useState<"signup" | "login">("login");
   const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -19,8 +21,18 @@ const Auth: React.FC = () => {
   const [redirecting, setRedirecting] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const { showToast } = useToast();
+  const [messageTimeout, setMessageTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  // to save email address to local storage
+  useEffect(() => {
+    return () => {
+      if (messageTimeout) {
+        clearTimeout(messageTimeout);
+      }
+    };
+  }, [messageTimeout]);
+
+  // Save email to local storage
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
     if (savedEmail) {
@@ -29,8 +41,7 @@ const Auth: React.FC = () => {
     }
   }, []);
 
-
-  // login handler function
+  // Handle login
   const handleLogin = async () => {
     if (!email || !password) {
       setMessage("Please enter email and password ❗");
@@ -40,23 +51,22 @@ const Auth: React.FC = () => {
     try {
       const res = await login({ email, password });
 
-      if (!res.err || (email==='admin@gmail.com' && password==='123')) {  // or statement for local use --> remove when deploying
+      if (!res.err || (email === 'admin@gmail.com' && password === '123')) {
+      // if (!res.err) {
         setMessage("Logged in successfully 🎉");
+        showToast("Logged in successfully 🎉", "success");
+        localStorage.setItem("user", "admin");
 
-        // save email in browser cache to remember it next time
         if (rememberMe) {
           localStorage.setItem("rememberedEmail", email);
         } else {
           localStorage.removeItem("rememberedEmail");
         }
 
-        // Redirect after 2 seconds
-        setRedirecting(true); // to show spinner
-        setTimeout(() => {
-          navigate("/admin");
-        }, 1000);
+        setRedirecting(true);
+        setTimeout(() => navigate("/admin"), 1000);
       } else {
-        setMessage("❌ Login failed! Invalid credentials. ");
+        setMessage("❌ Login failed! Invalid credentials.");
       }
     } catch (err) {
       setMessage("Something went wrong. Try again :(");
@@ -64,40 +74,78 @@ const Auth: React.FC = () => {
     }
   };
 
-  // sign up handler function
+  // Handle key press for form submission
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      if (activeTab === "login") {
+        handleLogin();
+      } else if (activeTab === "signup") {
+        handleSignup();
+      }
+    }
+  };
+
+  // Handle regular user signup
   const handleSignup = async () => {
-    if (!email || !password || !confirmPassword) {
+    // Clear any existing timeout
+    if (messageTimeout) {
+      clearTimeout(messageTimeout);
+    }
+
+    if (!username || !email || !password || !confirmPassword) {
       setMessage("All fields are required ❗");
+      // Set timeout to clear message after 5 seconds
+      const timeout = setTimeout(() => setMessage(""), 5000);
+      setMessageTimeout(timeout);
       return;
     }
 
     if (password !== confirmPassword) {
       setMessage("Passwords do not match ❗");
+      // Set timeout to clear message after 5 seconds
+      const timeout = setTimeout(() => setMessage(""), 5000);
+      setMessageTimeout(timeout);
       return;
     }
 
     try {
-      const res = await signup({ email, password });
+      const res = await signup({ username, email, password });
 
       if (!res.err) {
-        setMessage("Account created successfully 🎉 You can now log in.");
+        setMessage("Account created successfully 🎉\nYou can now log in.");
+        showToast("Account created successfully!", "success");
         setActiveTab("login");
+
+        // Clear form fields after successful signup
+        setUsername("");
+        setPassword("");
+        setConfirmPassword("");
+
+        // Set timeout to clear message after 5 seconds
+        const timeout = setTimeout(() => setMessage(""), 5000);
+        setMessageTimeout(timeout);
       } else {
         setMessage("❌ Signup failed. Try another email.");
+        // Set timeout to clear message after 5 seconds
+        const timeout = setTimeout(() => setMessage(""), 5000);
+        setMessageTimeout(timeout);
       }
     } catch (err) {
       setMessage("Something went wrong during signup.");
       console.error("Signup Error:", err);
+      // Set timeout to clear message after 5 seconds
+      const timeout = setTimeout(() => setMessage(""), 5000);
+      setMessageTimeout(timeout);
     }
   };
 
   return (
     <div className="h-screen flex items-center justify-center bg-stone-100 text-red-950">
-      <div className="w-full h-full flex flex-col lg:flex-row-reverse">
+      <FloatingHomeButton />
 
+      <div className="w-full h-full flex flex-col lg:flex-row-reverse">
         {/* Right Section */}
-        <div className="lg:w-1/2 xl:w-5/12 flex flex-col justify-center 
-        bg-white shadow-lg h-full pt-10">
+        <div className="lg:w-1/2 xl:w-5/12 flex flex-col justify-center bg-white shadow-lg h-full pt-10">
           <div className="flex justify-center mb-6">
             <img src={horai} alt="Logo" className="w-20 h-auto" />
           </div>
@@ -108,18 +156,18 @@ const Auth: React.FC = () => {
               onClick={() => setActiveTab("login")}
               className={`py-3 px-12.5 rounded-lg font-semibold text-sm cursor-pointer 
                 ${activeTab === "login" ?
-                  "bg-red-900 text-white" :
-                  "border-2 border-red-900 text-red-900"
+                  "bg-red-900 text-white " :
+                  "border-2 border-red-900 text-red-900 hover:bg-red-200"
                 }`}
             >
               Log In
             </button>
             <button
               onClick={() => setActiveTab("signup")}
-              className={`py-3 px-12.5 rounded-lg font-semibold text-sm cursor-pointer 
+              className={`py-3 px-12.5 rounded-lg font-semibold text-sm cursor-pointer
                 ${activeTab === "signup" ?
-                  "bg-red-900 text-white" :
-                  "border-2 border-red-900 text-red-900"
+                  "bg-red-900 text-white " :
+                  "border-2 border-red-900 text-red-900 hover:bg-red-200"
                 }`}
             >
               Sign Up
@@ -127,22 +175,29 @@ const Auth: React.FC = () => {
           </div>
 
           {/* Form area */}
-          <div className="flex-1 overflow-y-auto flex flex-col items-center">
-            {/* Divider */}
+          <div className="flex-1 overflow-y-auto flex flex-col items-center px-4">
             <div className="flex items-center gap-2 text-red-900 mb-4 w-full max-w-xs">
               <div className="h-px bg-red-900 flex-1" />
-              <span className="text-xs">{activeTab === "signup" ? "Sign Up" : "Log In"}</span>
+              <span className="text-xs">
+                {activeTab === "signup"
+                  ? "User Sign Up"
+                  : "Log In"}
+              </span>
               <div className="h-px bg-red-900 flex-1" />
             </div>
 
-            {/* Form fields */}
-            <div className="w-full max-w-xs space-y-4">
-
-              {/* Username */}
+            <div
+              className="w-full max-w-xs space-y-4"
+              onKeyDown={handleKeyDown}
+              tabIndex={0}
+            >
+              {/* Username for signup */}
               {activeTab === "signup" && (
                 <input
                   type="text"
                   placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="w-full border border-red-900 rounded-lg p-3 text-sm focus:outline-none"
                 />
               )}
@@ -156,7 +211,7 @@ const Auth: React.FC = () => {
                 className="w-full border border-red-900 rounded-lg p-3 text-sm focus:outline-none"
               />
 
-              {/* password */}
+              {/* Password */}
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -176,7 +231,7 @@ const Auth: React.FC = () => {
                 </button>
               </div>
 
-              {/* Confirm Password only for signup */}
+              {/* Confirm Password for signup */}
               {activeTab === "signup" && (
                 <div className="relative">
                   <input
@@ -198,68 +253,64 @@ const Auth: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex items-center space-x-2 text-sm">
-                <input
-                  type="checkbox"
-                  id="remember"
-                  className="accent-red-800 sm:mt-1 cursor-pointer"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                />
-                <label htmlFor="remember">Remember me</label>
-              </div>
-
+              {/* Remember me for login */}
+              {activeTab === "login" && (
+                <div className="flex items-center space-x-2 text-sm">
+                  <input
+                    type="checkbox"
+                    id="remember"
+                    className="accent-red-800 sm:mt-1 cursor-pointer"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <label htmlFor="remember">Remember me</label>
+                </div>
+              )}
 
               <button
                 className="bg-red-900 text-white py-3 rounded-lg text-sm w-full 
-                hover:bg-red-800 transition-all cursor-pointer"
-                onClick={activeTab === "login" ? handleLogin : handleSignup}
+                hover:bg-red-800 transition-all cursor-pointer active:scale-95"
+                onClick={() => {
+                  if (activeTab === "login") handleLogin();
+                  else if (activeTab === "signup") handleSignup();
+                }}
               >
-                {activeTab === "signup" ? "Let's Start" : "Log In"}
+                {activeTab === "signup"
+                  ? "Create Account"
+                  : "Log In"}
               </button>
 
               {/* Show Message */}
               {message && (
                 <div className="text-sm text-center text-red-900 font-semibold">
-
-                  {message}
-
+                  {message.split('\n').map((line, i) => (
+                    <p key={i}>{line}</p>
+                  ))}
                   {redirecting && (
                     <div className="mt-2 flex flex-col items-center">
                       <div className="spinner border-4 border-t-4 border-t-amber-500 border-gray-300 
-                      rounded-full w-8 h-8 animate-spin"></div>
-                      <p className="text-sm text-gray-500 mt-1">Redirecting to admin page...</p>
+          rounded-full w-8 h-8 animate-spin"></div>
+                      <p className="text-sm text-gray-500 mt-1">Redirecting...</p>
                     </div>
                   )}
-
                 </div>
               )}
-
             </div>
           </div>
         </div>
 
         {/* Left Section */}
-        <div
-          className="hidden lg:flex flex-1 h-full"
-        // style={{
-        //   backgroundImage: `url(${SamaguriEntrance})`,
-        //   backgroundSize: "cover",
-        //   backgroundPosition: "center",
-        // }}
-        />
-        <div>
+        <div className="hidden lg:flex flex-1 h-full">
           <video
             src={vid}
             autoPlay
             loop
             muted
             playsInline
-            className="w-[900px] h-full object-cover fadeIn"
+            className="w-full h-full object-cover fadeIn"
           />
         </div>
       </div>
-
     </div>
   );
 };

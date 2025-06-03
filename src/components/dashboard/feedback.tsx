@@ -1,8 +1,11 @@
 import React from 'react'
+import VisitorCounter from '../visitorCounter/VisitorCounter'
 
 const FeedbackAdmin = () => {
     return (
-        <div>Feedback</div>
+        <div>
+            <VisitorCounter />
+        </div>
     )
 }
 

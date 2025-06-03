@@ -91,7 +91,7 @@ const CollectionsUpload: React.FC = () => {
 
   return (
 
-    <div className="w-full h-full overflow-y-auto px-6 sm:px-10 py-10 bg-gray-100 dark:bg-zinc-900 
+    <div className="w-full h-full overflow-y-visible sm:mt-10 mb-70 sm:mb-50 bg-gray-100 dark:bg-zinc-900 
     text-zinc-900 dark:text-white transition-all duration-300">
 
       {showToast && toast && (
@@ -103,7 +103,7 @@ const CollectionsUpload: React.FC = () => {
         >
           <div className="flex justify-between items-center gap-4">
             <span>{toast.message}</span>
-            <button onClick={() => setShowToast(false)}>
+            <button onClick={() => setShowToast(false)} className="cursor-pointer">
               <X size={18} className="hover:text-gray-200" />
             </button>
           </div>
@@ -116,7 +116,7 @@ const CollectionsUpload: React.FC = () => {
       )}
 
 
-      <div className="max-w-6xl mx-auto bg-white dark:bg-zinc-800 p-8 rounded-xl shadow-xl">
+      <div className="max-w-6xl mx-auto bg-white dark:bg-zinc-800 p-8 sm:px-15sm:py-10 rounded-xl shadow-xl">
         <h2 className="text-3xl font-bold mb-8 text-center">Upload to Collections</h2>
 
         <form onSubmit={handleSubmit} className="space-y-8">

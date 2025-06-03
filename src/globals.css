@@ -90,6 +90,14 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   animation: progress-bar 4s linear forwards;
 }
 
+/* custom navbar bg */
+.custom-bg-image {
+  background-image: url('./assets/gamusa-navbar.png'); /* Replace with the actual path to your image */
+  background-size: cover; /* Or contain, auto, etc., depending on your desired effect */
+  background-position: center; /* Adjust as needed */
+  background-repeat: no-repeat; /* Or repeat, repeat-x, repeat-y */
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

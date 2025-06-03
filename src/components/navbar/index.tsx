@@ -26,6 +26,14 @@ const Navbar = () => {
         bg-red-900 dark:bg-white/10 backdrop-blur-3xl"
       >
 
+      {/* bg navbar */}
+      {/* <nav
+        className={`absolute sm:fixed z-50 top-8 left-1/2 transform -translate-x-1/2
+    w-[80%] sm:w-[92%] max-w-7xl px-4 sm:px-6 py-3
+    flex justify-between items-center rounded-4xl border-0 border-red-500 dark:border transition-colors
+    bg-image dark:bg-white/10 backdrop-blur-3xl custom-bg-image`}
+      > */}
+
         {/* Logo - Moves to Center for Small Screens, Left for Larger Screens */}
         <div className="flex items-center">
           <img src={blankLogo} alt="blankLogo" className="h-10 w-30 rounded-full" />
@@ -52,6 +60,7 @@ const Navbar = () => {
           <NavLink href="/collections" label="COLLECTIONS" />
           <NavLink href="/events" label="EVENTS" />
           <NavLink href="/visit" label="VISIT" />
+          <NavLink href="/feedback" label="FEEDBACK" />
           <NavLink href="/about" label="ABOUT US" />
         </ul>
 

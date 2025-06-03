@@ -17,10 +17,16 @@ import Dashboard from "./components/dashboard/dashboard";
 import PlayerAdmin from "./components/dashboard/audioPlayer";
 import FeedbackAdmin from "./components/dashboard/feedback";
 import EventsAdmin from "./components/dashboard/events";
+import ProtectedRoute from "./components/authentication/ProtectedRoute";
+import Plan from "./pages/visit/plan";
+import FloatingHomeButton from "./components/authentication/floatingHomeButton";
+import Feedback from "./pages/feedback/feedback";
+import Questionnaire from "./components/questionaire/questionaire";
+import Certificate from "./components/questionaire/certificate";
 
 function App() {
 	return (
-		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+		<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
 			<Router>
 				<Routes>
 					{/* All public routes under RootLayout */}
@@ -29,25 +35,36 @@ function App() {
 						<Route path="collections" element={<Collections />} />
 						<Route path="events" element={<Event />} />
 						<Route path="visit" element={<Visit />} />
+						<Route path="feedback" element={<Feedback />} />
 						<Route path="about" element={<AboutPage />} />
 						<Route path="QRScanner" element={<QRScanner onClose={() => { }} />} />
 						<Route path="audioplayer" element={<AudioPlayer />} />
 						<Route path="mukha" element={<MukhasBlog />} />
+						<Route path="plan" element={<Plan />} />
+						<Route path="questionnaire" element={<Questionnaire />} />
+						<Route path="certificate" element={<Certificate />} />
 					</Route>
 
 					{/* Auth-only layout routes */}
 					<Route element={<AuthLayout />}>
 						<Route path="/auth" element={<Auth />} />
-						{/* Make AdminPage a layout route */}
-						<Route path="/admin" element={<AdminPage />}>
+
+						<Route
+							path="/admin"
+							element={
+								<ProtectedRoute>
+									<AdminPage />
+								</ProtectedRoute>
+							}
+						>
+							<Route index element={<Dashboard />} />
 							<Route path="upload" element={<CollectionsUpload />} />
-							<Route path="dashboard" element={<Dashboard />} />
 							<Route path="playerAdmin" element={<PlayerAdmin />} />
 							<Route path="feedbackAdmin" element={<FeedbackAdmin />} />
 							<Route path="eventsAdmin" element={<EventsAdmin />} />
-							{/* Add more child routes here if needed */}
 						</Route>
 					</Route>
+
 				</Routes>
 			</Router>
 		</ThemeProvider>
@@ -57,7 +74,7 @@ function App() {
 export default App;
 
 
-
+// AIzaSyBmCI5hqksQpdwPRD4lEJ4PI2WB7i2Or7g google ai studio api key
 
 
 
