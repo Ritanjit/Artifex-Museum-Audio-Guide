@@ -8,6 +8,7 @@ import {
   Menu,
   X,
   Home,
+  CloudUpload,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -17,6 +18,7 @@ const tabs = [
   { name: "Feedback", icon: <MessageSquare size={24} />, path: "/admin/feedbackAdmin" },
   { name: "Events", icon: <CalendarCheck size={24} />, path: "/admin/eventsAdmin" },
   { name: "Audio Player", icon: <Music size={24} />, path: "/admin/playerAdmin" },
+  { name: "Cloud Upload", icon: <CloudUpload size={24} />, path: "/admin/cloudUpload" },
 ];
 
 const AdminSidebar = () => {

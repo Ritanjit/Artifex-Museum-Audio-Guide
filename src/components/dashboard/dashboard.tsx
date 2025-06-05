@@ -14,7 +14,7 @@ import {
 import { Card, CardContent } from "../ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Star, Users, MessageSquare, BarChart2, CalendarIcon } from "lucide-react";
-import useVisitCounter from "../visitorCounter/VisitorCounter";
+// import useVisitCounter from "../visitorCounter/VisitorCounter";
 
 const data = {
     week: [
@@ -75,7 +75,7 @@ const AnimatedBar = (props: any) => {
 
 const Dashboard = () => {
 
-    const visits = useVisitCounter();
+    // const visits = useVisitCounter();
     const [view, setView] = useState("week");
 
     const totalVisitors = data[view].reduce((sum, d) => sum + d.visitors, 0);
@@ -104,8 +104,8 @@ const Dashboard = () => {
                             <p className="text-sm text-gray-500">Total Visitors</p>
                             <p className="text-3xl font-semibold text-gray-800 transition duration-300 
                             group-hover:scale-105">
-                                {/* {totalVisitors} */}
-                                {visits !== null ? visits.toLocaleString() : "Loading..."}
+                                {totalVisitors}
+                                {/* {visits !== null ? visits.toLocaleString() : "Loading..."} */}
                             </p>
                         </div>
                     </CardContent>

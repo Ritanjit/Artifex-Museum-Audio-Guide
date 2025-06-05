@@ -6,7 +6,7 @@ import VisitorCounter from "../visitorCounter/VisitorCounter";
 
 export const Footer: React.FC = () => {
 
-  const visits = useVisitCounter();
+  // const visits = useVisitCounter();
 
   const navigate = useNavigate();
 
@@ -101,10 +101,10 @@ export const Footer: React.FC = () => {
       <p className="text-3xl font-semibold text-gray-800 transition duration-300 
                             group-hover:scale-105">
         {/* {totalVisitors} */}
-        {visits !== null ? visits.toLocaleString() : "Loading..."}
+        {/* {visits !== null ? visits.toLocaleString() : "Loading..."} */}
       </p>
 
-      <VisitorCounter />
+      {/* <VisitorCounter /> */}
 
     </footer>
   );

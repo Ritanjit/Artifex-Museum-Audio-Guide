@@ -94,7 +94,7 @@ const Navbar = () => {
         <NavItem href="/visit" icon={<Compass size={24} />} label="Visit" />
         <NavItem href="/collections" icon={<Layers size={24} />} label="Collections" />
         <NavItem href="/events" icon={<Calendar size={24} />} label="Event" />
-        <NavItem href="/about" icon={<Info size={24} />} label="About Us" />
+        <NavItem href="/feedback" icon={<Info size={24} />} label="Feedback" />
       </div>
 
 

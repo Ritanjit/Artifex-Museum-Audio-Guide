@@ -23,6 +23,7 @@ import FloatingHomeButton from "./components/authentication/floatingHomeButton";
 import Feedback from "./pages/feedback/feedback";
 import Questionnaire from "./components/questionaire/questionaire";
 import Certificate from "./components/questionaire/certificate";
+import CloudUpload from "./components/dashboard/cloudUpload";
 
 function App() {
 	return (
@@ -62,6 +63,7 @@ function App() {
 							<Route path="playerAdmin" element={<PlayerAdmin />} />
 							<Route path="feedbackAdmin" element={<FeedbackAdmin />} />
 							<Route path="eventsAdmin" element={<EventsAdmin />} />
+							<Route path="cloudUpload" element={<CloudUpload />} />
 						</Route>
 					</Route>
 

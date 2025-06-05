@@ -7,13 +7,14 @@ import heroBg from "../../assets/landingBg.png";
 import heroImage from "../../assets/trad.jpg";
 import bg from "../../assets/herobg.jpg";
 import majuliBg from '../../assets/majuliDark.jpg'
-import vid from "../../assets/majuli1.mp4";
+// import vid from "../../assets/majuli1.mp4";
 import { useTheme } from "@/components/theme-provider/theme-provider";
 import { ChevronDown } from "lucide-react";
 import HeroSlider from "./slider";
 
 export const BackgroundPattern = () => {
   const { theme } = useTheme();
+  const vid = "https://uploads.backendservices.in/storage/internship/artifex/videos/174910631633947.mp4";
 
   return (
     <>
