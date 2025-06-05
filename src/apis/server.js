@@ -5,7 +5,7 @@ import { serve, file, write } from "bun";
 
 const port = 4466;
 const hostname = "v5.frontql.dev";
-const basicAuth = "Basic czVfaW50ZXJuX2RhdGFiYXNlLDE3NDkwNjM1MTUxNzI6Y21kb04zVTU=";  // regenerates after 24hrs
+const basicAuth = "Basic czVfaW50ZXJuX2RhdGFiYXNlLDE3NDkxMzQzMTM4NDE6T0dZeVltRTM=";  // regenerates after 24hrs
 
 
 const tokensPath = "src/apis/tokens.json";

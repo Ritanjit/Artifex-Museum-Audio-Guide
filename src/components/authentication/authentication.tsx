@@ -51,8 +51,8 @@ const Auth: React.FC = () => {
     try {
       const res = await login({ email, password });
 
-      if (!res.err || (email === 'admin@gmail.com' && password === '123')) {
-      // if (!res.err) {
+      // if (!res.err || (email === 'admin@gmail.com' && password === '123')) {
+      if (!res.err) {
         setMessage("Logged in successfully 🎉");
         showToast("Logged in successfully 🎉", "success");
         localStorage.setItem("user", "admin");

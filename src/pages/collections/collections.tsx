@@ -1,9 +1,17 @@
-// src/pages/collections/collections.tsx
 import CollectionsBanner from "@/components/collections/collectionsBanner";
 import FloatingSearchBar from "@/components/searchbar";
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { getAllArtifacts, Artifact } from "@/actions/collections";
+import { getCollections } from "@/actions/collections";
+
+// Define the structure of a collection item
+interface CollectionItem {
+  id: string;
+  name: string;
+  category: string;
+  keywords: string[];
+  image_url: string;
+}
 
 const Collections: React.FC = () => {
   const location = useLocation();
@@ -11,61 +19,34 @@ const Collections: React.FC = () => {
   const initialSearchQuery = params.get("search") || "";
 
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
-  const [showAll, setShowAll] = useState<Record<string, boolean>>({});
+  const [showAll, setShowAll] = useState<{ [key: string]: boolean }>({});
   const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [collectionsData, setCollectionsData] = useState<CollectionItem[]>([]);
   const navigate = useNavigate();
 
-  const [collectionsData, setCollectionsData] = useState<
-    { title: string; items: { id: string; src: string; name: string }[] }[]
-  >([]);
-  const [loading, setLoading] = useState(true);
-
-  // Whenever `searchQuery` changes (or on first load), fetch artifacts.
+  // Fetch collections from API
   useEffect(() => {
-    const fetchArtifacts = async () => {
+    const fetchCollections = async () => {
       try {
-        setLoading(true);
-        const artifacts = await getAllArtifacts({ search: searchQuery });
-        const grouped = groupByCategory(artifacts);
-        setCollectionsData(grouped);
+        setIsLoading(true);
+        const response = await getCollections();
+        if (response?.data) {
+          setCollectionsData(response.data);
+        } else {
+          console.error("Failed to fetch collections:", response);
+          setError(true);
+        }
       } catch (err) {
-        console.error("Failed to fetch collections", err);
-        setCollectionsData([]);
+        console.error("Error fetching collections:", err);
+        setError(true);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    fetchArtifacts();
-  }, [searchQuery]);
-
-  /**
-   * Groups an array of Artifact[] by their `category` field,
-   * then returns an array of { title, items } where `items` contains
-   * { id, src: imageUrl, name } objects.
-   */
-  function groupByCategory(data: Artifact[]) {
-    // Handle case where data might be undefined
-    if (!data) return [];
-
-    const grouped: Record<string, Artifact[]> = {};
-
-    data.forEach((item) => {
-      // Handle items without category
-      const category = item.category || "Uncategorized";
-      if (!grouped[category]) grouped[category] = [];
-      grouped[category].push(item);
-    });
-
-    return Object.entries(grouped).map(([title, items]) => ({
-      title,
-      items: items.map((i) => ({
-        id: i.id,
-        src: i.imageUrl,
-        name: i.name,
-      })),
-    }));
-  }
+    fetchCollections();
+  }, []);
 
   const handleSearch = () => {
     if (!searchQuery.trim()) {
@@ -75,6 +56,37 @@ const Collections: React.FC = () => {
     }
     navigate(`/collections?search=${encodeURIComponent(searchQuery)}`);
   };
+
+  // Group collections by category
+  const groupedCollections = collectionsData.reduce((acc, item) => {
+    if (!acc[item.category]) {
+      acc[item.category] = [];
+    }
+    acc[item.category].push({
+      src: item.image_url,
+      name: item.name,
+      id: item.id
+    });
+    return acc;
+  }, {} as Record<string, Array<{ src: string; name: string; id: string }>>);
+
+  // Convert grouped object to array format
+  const collectionSections = Object.entries(groupedCollections).map(
+    ([title, items]) => ({
+      title,
+      items
+    })
+  );
+
+  // Filter collections based on search query
+  const filteredCollections = collectionSections
+    .map((collection) => {
+      const filteredItems = collection.items.filter((item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      return { ...collection, items: filteredItems };
+    })
+    .filter((collection) => collection.items.length > 0);
 
   return (
     <div className="bg-stone-100 dark:bg-black min-h-screen text-red-900 dark:text-white pb-15">
@@ -98,14 +110,17 @@ const Collections: React.FC = () => {
       )}
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {loading ? (
-          <div className="flex justify-center mt-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
+        {isLoading ? (
+          <div className="mt-20 flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mb-4"></div>
+            <p className="text-gray-500 dark:text-gray-400">Loading collections...</p>
           </div>
-        ) : collectionsData.length > 0 ? (
-          collectionsData.map((section) => {
+        ) : filteredCollections.length > 0 ? (
+          filteredCollections.map((section) => {
             const isExpanded = showAll[section.title] || false;
-            const displayedItems = isExpanded ? section.items : section.items.slice(0, 5);
+            const displayedItems = isExpanded
+              ? section.items
+              : section.items.slice(0, 5);
 
             return (
               <section key={section.title} className="mt-25 fade-in">
@@ -119,7 +134,8 @@ const Collections: React.FC = () => {
                           [section.title]: !isExpanded,
                         }))
                       }
-                      className="text-lg font-bold text-red-900 hover:text-amber-500 dark:text-gray-300 dark:hover:text-white underline"
+                      className="text-lg font-bold text-red-900 hover:text-amber-500 dark:text-gray-300
+                      dark:hover:text-white underline"
                     >
                       {isExpanded ? "Show Less" : "Show All"}
                     </button>
@@ -128,23 +144,38 @@ const Collections: React.FC = () => {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
                   {displayedItems.map((item) => (
-                    <Link to={`/audioplayer/${item.id}`} key={item.id} className="block">
-                      <div className="relative group rounded-2xl overflow-hidden w-full h-[280px] sm:h-[300px] md:h-[340px] shadow-md hover:shadow-lg transition duration-500">
-                        <img
-                          src={item.src}
-                          alt={item.name}
-                          className="rounded-xl object-cover w-full h-full transition-all duration-500 ease-in-out transform group-hover:scale-105"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = "src/assets/placeholder.jpg";
-                          }}
-                        />
-                        <div className="absolute z-10 bottom-3 left-0 mx-2 p-2 bg-red-900 dark:bg-white/60 backdrop-blur-lg w-[calc(100%-16px)] border border-white dark:border-black rounded-lg shadow-sm shadow-transparent transition-all duration-500 group-hover:shadow-indigo-200 dark:group-hover:bg-amber-500">
-                          <h6 className="font-semibold text-sm leading-6 text-white group-hover:text-amber-500 dark:text-black text-center">
+                    <Link
+                      to={`/collections/${item.id}`}
+                      key={item.id}
+                      className="block"
+                    >
+                      <div className="relative group rounded-2xl overflow-hidden w-full h-[280px] sm:h-[300px]
+                      md:h-[340px] shadow-md hover:shadow-lg transition duration-500">
+                        {item.src ? (
+                          <img
+                            src={item.src}
+                            alt={item.name}
+                            className="rounded-xl object-cover w-full h-full transition-all duration-500 ease-in-out
+                            transform group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="bg-gray-200 dark:bg-zinc-800 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+                            <span className="text-gray-500">No image</span>
+                          </div>
+                        )}
+                        <div
+                          className="absolute z-10 bottom-3 left-0 mx-2 p-2 bg-red-900 dark:bg-white/60
+                          backdrop-blur-lg w-[calc(100%-16px)] border border-white dark:border-black
+                          rounded-lg shadow-sm shadow-transparent transition-all duration-500
+                          group-hover:shadow-indigo-200 dark:group-hover:bg-amber-500"
+                        >
+                          <h6 className="font-semibold text-sm leading-6 text-white group-hover:text-amber-500
+                          dark:text-black text-center">
                             {item.name}
                           </h6>
-                          <p className="text-xs leading-5 text-gray-200 dark:text-gray-800 text-center group-hover:text-amber-500/80">
-                            Satra Collections
+                          <p className="text-xs leading-5 text-gray-200 dark:text-gray-800 text-center
+                          group-hover:text-amber-500/80">
+                            {section.title} Collection
                           </p>
                         </div>
                       </div>
@@ -155,11 +186,15 @@ const Collections: React.FC = () => {
             );
           })
         ) : (
-          <p className="text-center text-gray-400 mt-10">
-            {searchQuery
-              ? `No collections found for "${searchQuery}"`
-              : "No collections available yet"}
-          </p>
+          <div className="text-center py-20">
+            <div className="text-4xl mb-4">🔍</div>
+            <h3 className="text-xl font-bold mb-2">No Collections Found</h3>
+            <p className="text-gray-500 dark:text-gray-400">
+              {searchQuery
+                ? `No results for "${searchQuery}". Try another search term.`
+                : "The collection is currently empty."}
+            </p>
+          </div>
         )}
       </div>
     </div>
@@ -167,7 +202,6 @@ const Collections: React.FC = () => {
 };
 
 export default Collections;
-
 
 
 

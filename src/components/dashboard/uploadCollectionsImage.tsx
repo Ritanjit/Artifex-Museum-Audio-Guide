@@ -1,13 +1,15 @@
+// src\components\dashboard\uploadCollectionsImage.tsx
 import React, { FC, useState, useRef, ChangeEvent } from "react";
 import { compressImage, uploadImage as apiUploadImage } from "../../apis/image";
 import { CloudUpload, X, Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 interface UploadCollectionsImageProps {
-    /** Called with the full URL once upload completes (empty string on remove). */
     onUploadSuccess: (url: string) => void;
+    resetTrigger?: boolean;
 }
 
-const UploadCollectionsImage: FC<UploadCollectionsImageProps> = ({ onUploadSuccess }) => {
+const UploadCollectionsImage: FC<UploadCollectionsImageProps> = ({ onUploadSuccess, resetTrigger }) => {
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -15,6 +17,12 @@ const UploadCollectionsImage: FC<UploadCollectionsImageProps> = ({ onUploadSucce
     const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (resetTrigger) {
+            handleRemove();
+        }
+    }, [resetTrigger]);
 
     // Open the native file dialog
     const openFileDialog = () => {
@@ -94,8 +102,8 @@ const UploadCollectionsImage: FC<UploadCollectionsImageProps> = ({ onUploadSucce
             {/* Image selection / preview box */}
             <div
                 className={`border-2 rounded-md p-4 text-center cursor-pointer transition-all ${file
-                        ? "border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
-                        : "border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
+                    ? "border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+                    : "border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
                     }`}
                 onClick={openFileDialog}
             >
@@ -140,8 +148,8 @@ const UploadCollectionsImage: FC<UploadCollectionsImageProps> = ({ onUploadSucce
                         onClick={handleUpload}
                         disabled={isUploading}
                         className={`w-full flex items-center justify-center gap-2 rounded-lg py-2.5 transition-colors text-white ${isUploading
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-red-900 hover:bg-red-800 dark:bg-amber-600 dark:hover:bg-amber-500"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-red-900 hover:bg-red-800 dark:bg-amber-600 dark:hover:bg-amber-500"
                             }`}
                     >
                         {isUploading ? (
