@@ -5,7 +5,7 @@ import '../floatingButton/floatingButton.css';
 
 const FloatingChatButton = ({ isOpen, toggleOpen }: { isOpen: boolean; toggleOpen: () => void }) => {
     return (
-        <div className="fixed bottom-24 right-8 z-50 group cursor-pointer">
+        <div className="fixed bottom-38 sm:bottom-24 right-4 sm:right-8 z-50 group cursor-pointer">
             {/* Chat Button */}
             <Button
                 onClick={toggleOpen}

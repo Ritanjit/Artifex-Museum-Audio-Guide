@@ -1,9 +1,43 @@
-import { useState } from "react";
+// src\components\hero-06\hero-06.tsx
+import { useState, useEffect } from "react";
 import { BackgroundPattern } from "./background-pattern";
 import FloatingSearchBar from "@/components/searchbar";
+import { getCollections } from "@/actions/collections";
+import { useNavigate } from "react-router-dom";
+
+// Define collection item interface
+interface CollectionItem {
+  id: string;
+  name: string;
+  category: string;
+  keywords: string[];
+  imageUrl: string;
+}
 
 const Hero06 = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [collectionsData, setCollectionsData] = useState<CollectionItem[]>([]);
+  const navigate = useNavigate();
+
+  // Fetch collections from API
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const data = await getCollections();
+        setCollectionsData(data);
+      } catch (err) {
+        console.error("Error fetching collections:", err);
+      }
+    };
+
+    fetchCollections();
+  }, []);
+
+  // Handle search redirect
+  const handleSearch = () => {
+    if (!searchQuery.trim()) return;
+    navigate(`/collections?search=${encodeURIComponent(searchQuery)}`);
+  };
 
   return (
     <>
@@ -34,8 +68,9 @@ const Hero06 = () => {
           <FloatingSearchBar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            handleSearch={() => {}}
+            handleSearch={handleSearch}
             showPrompt={true}
+            collectionsData={collectionsData}
           />
         </div>
       </div>

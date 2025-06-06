@@ -21,7 +21,8 @@ export const BackgroundPattern = () => {
       {theme === "dark" && (
         <div
           className="absolute inset-0 h-screen bg-cover bg-center opacity-50"
-          style={{ backgroundImage: `url(${majuliBg})` }}
+          // className="absolute inset-0 h-[320px] bg-fixed bg-cover bg-center opacity-50"
+          style={{ backgroundImage: `url("https://uploads.backendservices.in/storage/internship/artifex/images/wallpaperflare.com_wallpaper.jpg")` }}
         ></div>
       )}
 

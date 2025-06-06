@@ -1,3 +1,4 @@
+// src\pages\collections\collections.tsx
 import CollectionsBanner from "@/components/collections/collectionsBanner";
 import FloatingSearchBar from "@/components/searchbar";
 import React, { useState, useEffect } from "react";
@@ -10,7 +11,7 @@ interface CollectionItem {
   name: string;
   category: string;
   keywords: string[];
-  image_url: string;
+  imageUrl: string;
 }
 
 const Collections: React.FC = () => {
@@ -20,9 +21,10 @@ const Collections: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [showAll, setShowAll] = useState<{ [key: string]: boolean }>({});
-  const [error, setError] = useState(false);
+  const [searchError, setSearchError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [collectionsData, setCollectionsData] = useState<CollectionItem[]>([]);
+  const [apiError, setApiError] = useState(false);
   const navigate = useNavigate();
 
   // Fetch collections from API
@@ -30,16 +32,12 @@ const Collections: React.FC = () => {
     const fetchCollections = async () => {
       try {
         setIsLoading(true);
-        const response = await getCollections();
-        if (response?.data) {
-          setCollectionsData(response.data);
-        } else {
-          console.error("Failed to fetch collections:", response);
-          setError(true);
-        }
+        const data = await getCollections(); // Directly get the array
+        setCollectionsData(data);
+        setApiError(false);
       } catch (err) {
         console.error("Error fetching collections:", err);
-        setError(true);
+        setApiError(true);
       } finally {
         setIsLoading(false);
       }
@@ -50,8 +48,8 @@ const Collections: React.FC = () => {
 
   const handleSearch = () => {
     if (!searchQuery.trim()) {
-      setError(true);
-      setTimeout(() => setError(false), 2000);
+      setSearchError(true);
+      setTimeout(() => setSearchError(false), 2000);
       return;
     }
     navigate(`/collections?search=${encodeURIComponent(searchQuery)}`);
@@ -63,7 +61,7 @@ const Collections: React.FC = () => {
       acc[item.category] = [];
     }
     acc[item.category].push({
-      src: item.image_url,
+      src: item.imageUrl,
       name: item.name,
       id: item.id
     });
@@ -79,29 +77,59 @@ const Collections: React.FC = () => {
   );
 
   // Filter collections based on search query
+  // const filteredCollections = collectionSections
+  //   .map((collection) => {
+  //     const filteredItems = collection.items.filter((item) =>
+  //       item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  //     );
+  //     return { ...collection, items: filteredItems };
+  //   })
+  //   .filter((collection) => collection.items.length > 0);
+  
+
+  // Filter collections based on search query
   const filteredCollections = collectionSections
     .map((collection) => {
-      const filteredItems = collection.items.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      const filteredItems = collection.items.filter((item) => {
+        const collectionItem = collectionsData.find(ci => ci.id === item.id);
+        if (!collectionItem) return false;
+
+        return (
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          collectionItem.keywords.some(kw =>
+            kw.toLowerCase().includes(searchQuery.toLowerCase())
+          ) ||
+          collectionItem.category.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      });
       return { ...collection, items: filteredItems };
     })
     .filter((collection) => collection.items.length > 0);
+
 
   return (
     <div className="bg-stone-100 dark:bg-black min-h-screen text-red-900 dark:text-white pb-15">
       <CollectionsBanner />
 
-      <div className="mt-20">
+      {/* <div className="mt-20">
         <FloatingSearchBar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           handleSearch={handleSearch}
           showPrompt={true}
         />
-      </div>
+      </div> */}
 
-      {error && (
+        <FloatingSearchBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          handleSearch={handleSearch}
+          showPrompt={true}
+          // Pass collections data to searchbar
+          collectionsData={collectionsData}
+        />
+
+      {searchError && (
         <div className="flex justify-center mt-2">
           <div className="bg-red-500 text-white text-sm px-3 py-2 rounded shadow-md">
             Please enter a search query!
@@ -115,12 +143,25 @@ const Collections: React.FC = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mb-4"></div>
             <p className="text-gray-500 dark:text-gray-400">Loading collections...</p>
           </div>
+        ) : apiError ? (
+          <div className="text-center py-20">
+            <div className="text-4xl mb-4">⚠️</div>
+            <h3 className="text-xl font-bold mb-2">Failed to Load Collections</h3>
+            <p className="text-gray-500 dark:text-gray-400">
+              Please try again later.
+            </p>
+          </div>
         ) : filteredCollections.length > 0 ? (
           filteredCollections.map((section) => {
             const isExpanded = showAll[section.title] || false;
             const displayedItems = isExpanded
               ? section.items
               : section.items.slice(0, 5);
+
+            // Reset showAll state when search changes
+            // useEffect(() => {
+            //   setShowAll({});
+            // }, [searchQuery]);
 
             return (
               <section key={section.title} className="mt-25 fade-in">
@@ -135,7 +176,7 @@ const Collections: React.FC = () => {
                         }))
                       }
                       className="text-lg font-bold text-red-900 hover:text-amber-500 dark:text-gray-300
-                      dark:hover:text-white underline"
+                      dark:hover:text-white underline cursor-pointer"
                     >
                       {isExpanded ? "Show Less" : "Show All"}
                     </button>
@@ -144,10 +185,18 @@ const Collections: React.FC = () => {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
                   {displayedItems.map((item) => (
-                    <Link
-                      to={`/collections/${item.id}`}
-                      key={item.id}
-                      className="block"
+                    <div
+                      key={item.name}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                        // Slight delay to allow smooth scroll before navigating
+                        setTimeout(() => {
+                          navigate(`/audioplayer`);
+                          // navigate(`/audioplayer/${item.id}`);
+                        }, 300);
+                      }}
+                      className="block cursor-pointer"
                     >
                       <div className="relative group rounded-2xl overflow-hidden w-full h-[280px] sm:h-[300px]
                       md:h-[340px] shadow-md hover:shadow-lg transition duration-500">
@@ -179,7 +228,7 @@ const Collections: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               </section>

@@ -1,6 +1,5 @@
-// src\components\dashboard\upload.tsx
 import React, { useState } from "react";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import UploadCollectionsImage from "./uploadCollectionsImage";
 import { uploadArtifact } from "@/actions/collections";
 
@@ -73,14 +72,14 @@ const CollectionsUpload: React.FC = () => {
       } else {
         triggerToast("Artifact uploaded successfully!", "success");
 
-        // ✅ Reset form and image upload component
+        // Reset form and image upload component
         setArtifactName("");
         setKeywords([]);
         setCurrentKeyword("");
         setCollectionCategory("");
         setImageURL("");
-        setResetImageComponent(true); // Trigger reset
-        setTimeout(() => setResetImageComponent(false), 100); // Reset the trigger
+        setResetImageComponent(true);
+        setTimeout(() => setResetImageComponent(false), 100);
       }
     } catch (err) {
       console.error("Upload failed:", err);
@@ -90,14 +89,15 @@ const CollectionsUpload: React.FC = () => {
     }
   };
 
-
   return (
     <div className="w-full h-full overflow-y-visible sm:mt-10 mb-70 sm:mb-50 bg-gray-100 dark:bg-zinc-900 text-zinc-900 dark:text-white transition-all duration-300">
       {/* Toast notification */}
       {showToast && toast && (
         <div
-          className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-sm shadow-lg text-sm max-w-sm ${toast.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white animate-slide-in`}
+          className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-sm shadow-lg text-sm max-w-sm ${toast.type === "success"
+            ? "bg-red-800 dark:bg-amber-600 text-white"
+            : "bg-red-900 text-white"}
+            animate-slide-in`}
         >
           <div className="flex justify-between items-center gap-4">
             <span>{toast.message}</span>
@@ -111,7 +111,7 @@ const CollectionsUpload: React.FC = () => {
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto bg-white dark:bg-zinc-800 p-8 sm:px-15 sm:py-10 rounded-xl shadow-xl">
+      <div className="max-w-6xl mx-auto bg-white dark:bg-zinc-800 p-8 sm:px-15 sm:py-10 rounded-xl shadow-xl border border-gray-200 dark:border-zinc-700">
         <h2 className="text-3xl font-bold mb-8 text-center">Upload to Collections</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -129,12 +129,12 @@ const CollectionsUpload: React.FC = () => {
               value={imageURL}
               onChange={(e) => setImageURL(e.target.value)}
               placeholder="Image URL will appear here after upload"
-              className="w-full px-4 py-2 rounded-md border bg-white dark:bg-zinc-700 dark:border-zinc-600 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+              className="w-full px-4 py-2 rounded-md border bg-white dark:bg-zinc-700 border-gray-300 dark:border-zinc-600 focus:ring-2 focus:ring-red-800 dark:focus:ring-amber-600 focus:outline-none"
               required
               readOnly
             />
             <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
-              After uploading an image, the URL will populate here.
+              After uploading an image, the URL will automatically populate here. Do not change it manually.
             </p>
           </div>
 
@@ -146,7 +146,7 @@ const CollectionsUpload: React.FC = () => {
               value={artifactName}
               onChange={(e) => setArtifactName(e.target.value)}
               placeholder="e.g. Royal Sword of Sukapha"
-              className="w-full px-4 py-2 rounded-md border bg-white dark:bg-zinc-700 dark:border-zinc-600 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+              className="w-full px-4 py-2 rounded-md border bg-white dark:bg-zinc-700 border-gray-300 dark:border-zinc-600 focus:ring-2 focus:ring-red-800 dark:focus:ring-amber-600 focus:outline-none"
               required
             />
           </div>
@@ -157,7 +157,7 @@ const CollectionsUpload: React.FC = () => {
             <select
               value={collectionCategory}
               onChange={(e) => setCollectionCategory(e.target.value)}
-              className="w-full px-4 py-2 rounded-md border bg-white dark:bg-zinc-700 dark:border-zinc-600 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+              className="w-full px-4 py-2 rounded-md border bg-white dark:bg-zinc-700 border-gray-300 dark:border-zinc-600 focus:ring-2 focus:ring-red-800 dark:focus:ring-amber-600 focus:outline-none"
               required
             >
               <option value="">Select Category</option>
@@ -172,18 +172,18 @@ const CollectionsUpload: React.FC = () => {
           {/* 5) Keywords Input */}
           <div>
             <label className="block mb-2 font-semibold">
-              Artifact Keywords <span className="text-stone-500 text-xs">(press enter to add)</span>
+              Artifact Keywords <span className="text-gray-500 dark:text-gray-400 text-xs">(press enter to add)</span>
             </label>
             <div className="flex flex-wrap gap-2 mb-2">
               {keywords.map((keyword) => (
                 <span
                   key={keyword}
-                  className="flex items-center bg-amber-500 text-white px-3 py-1 rounded-full text-sm"
+                  className="flex items-center bg-red-800 dark:bg-amber-600 text-white px-3 py-1 rounded-full text-sm"
                 >
                   {keyword}
                   <button
                     type="button"
-                    className="ml-1 hover:text-red-500"
+                    className="ml-1 hover:text-red-300 dark:hover:text-amber-300"
                     onClick={() => handleRemoveKeyword(keyword)}
                   >
                     <X size={16} />
@@ -197,20 +197,30 @@ const CollectionsUpload: React.FC = () => {
               onChange={(e) => setCurrentKeyword(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type a keyword and press Enter"
-              className="w-full px-4 py-2 rounded-md border bg-white dark:bg-zinc-700 dark:border-zinc-600 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+              className="w-full px-4 py-2 rounded-md border bg-white dark:bg-zinc-700 border-gray-300 dark:border-zinc-600 focus:ring-2 focus:ring-red-800 dark:focus:ring-amber-600 focus:outline-none"
             />
           </div>
 
-          {/* 6) Submit Button */}
-          <div className="text-right">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`${isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-amber-500 hover:bg-amber-600"
-                } text-white px-6 py-3 rounded-lg font-medium transition-all duration-300`}
-            >
-              {isSubmitting ? "Uploading..." : "Upload Artifact"}
-            </button>
+          {/* 6) Submit Button (Bottom Right) */}
+          <div className="relative h-20">
+            <div className="absolute bottom-0 right-0">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`${isSubmitting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-red-800 hover:bg-red-900 dark:bg-amber-600 dark:hover:bg-amber-700"} 
+        text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 justify-center`}
+              >
+                {isSubmitting ? (
+                  <span className="animate-pulse">Uploading...</span>
+                ) : (
+                  <>
+                    <span>Upload Artifact</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>

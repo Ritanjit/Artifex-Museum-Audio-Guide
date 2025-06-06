@@ -1,3 +1,4 @@
+// src\actions\collections.js
 import Api from "@/apis/Api";
 
 export async function uploadArtifact({
@@ -7,18 +8,15 @@ export async function uploadArtifact({
     imageUrl
 }) {
     try {
-        // Use snake_case endpoint format
         const response = await Api.post("/artifex-collections", {
             body: {
                 name,
                 category,
-                keywords: JSON.stringify(keywords), // Convert to JSON string
-                imageUrl: imageUrl  // Match database column name
+                keywords: JSON.stringify(keywords),
+                imageUrl
             },
             fields: "id,name"
         });
-
-        console.log('Artifact uploaded successfully:', response);
         return response;
     } catch (error) {
         console.error('Error uploading artifact:', error);
@@ -26,18 +24,64 @@ export async function uploadArtifact({
     }
 }
 
+/**
+ * Fetch all collections from FrontQL (up to 1000, sorted by newest first).
+ * @returns {Promise<any[]>}  The array of rows (response.result) or throws on error.
+ */
+// export async function getCollections() {
+//     try {
+//         const response = await Api.get("/artifex-collections", {
+//             fields: "id,name,category,keywords,imageUrl,created_at,updated_at",
+//             sort: "-created_at",
+//             page: "1,1000",
+//         });
+
+//         console.log("getCollections → raw response:", response);
+//         // FrontQL v5 returns { err: false, result: [...], count: N }
+//         // so extract `result`, not `data`.
+//         if (Array.isArray(response.result)) {
+//             return response.result;
+//         } else {
+//             console.warn("Unexpected getCollections shape:", response);
+//             return [];
+//         }
+//     } catch (error) {
+//         console.error("Error in getCollections:", error);
+//         throw error;
+//     }
+// }
+
+
+// src\actions\collections.js
 export async function getCollections() {
     try {
         const response = await Api.get("/artifex-collections", {
-            fields: "id,name,category,keywords,image_url",
+            fields: "id,name,category,keywords,imageUrl,created_at,updated_at",
             sort: "-created_at",
-            page: "1,1000"
+            page: "1,1000",
         });
 
-        // Return the data array directly
-        return response.data || [];
+        if (Array.isArray(response.result)) {
+            return response.result.map(item => {
+                // Properly parse keywords
+                let keywords = [];
+                try {
+                    keywords = typeof item.keywords === 'string'
+                        ? JSON.parse(item.keywords)
+                        : item.keywords || [];
+                } catch (e) {
+                    console.error('Error parsing keywords:', e);
+                }
+
+                return {
+                    ...item,
+                    keywords: Array.isArray(keywords) ? keywords : []
+                };
+            });
+        } else {
+            return [];
+        }
     } catch (error) {
-        console.error('Error fetching collections:', error);
         throw error;
     }
 }
