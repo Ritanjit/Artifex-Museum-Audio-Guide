@@ -1,3 +1,4 @@
+// src\components\dashboard\upload.tsx
 import React, { useState } from "react";
 import { X, Plus } from "lucide-react";
 import UploadCollectionsImage from "./uploadCollectionsImage";

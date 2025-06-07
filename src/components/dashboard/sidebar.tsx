@@ -7,14 +7,19 @@ import {
   Music,
   Menu,
   X,
+  PanelLeftClose,
   Home,
   CloudUpload,
+  UserPen,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { PanelLeftCloseIcon } from "../ui/panelClose"
+import { HomeIcon } from "../../components/ui/home"
 
 const tabs = [
-  { name: "Home", icon: <Home size={24} />, path: "/admin" },
+  { name: "Home", icon: <HomeIcon size={24} />, path: "/admin" },
   { name: "Upload", icon: <Upload size={24} />, path: "/admin/upload" },
+  { name: "Manager", icon: <UserPen size={24} />, path: "/admin/collectionManager" },
   { name: "Feedback", icon: <MessageSquare size={24} />, path: "/admin/feedbackAdmin" },
   { name: "Events", icon: <CalendarCheck size={24} />, path: "/admin/eventsAdmin" },
   { name: "Audio Player", icon: <Music size={24} />, path: "/admin/playerAdmin" },
@@ -22,7 +27,7 @@ const tabs = [
 ];
 
 const AdminSidebar = () => {
-  
+
   const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
 
@@ -31,15 +36,13 @@ const AdminSidebar = () => {
       {/* Sidebar for Desktop */}
       <div className="hidden md:flex z-50 h-screen">
         <div
-          className={`bg-red-900 text-white transition-all duration-500 ease-in-out ${
-            isOpen ? "w-64" : "w-16"
-          } flex flex-col`}
+          className={`bg-red-900 text-white transition-all duration-500 ease-in-out ${isOpen ? "w-64" : "w-16"
+            } flex flex-col`}
         >
           <div className="flex items-center justify-between px-4 py-4 border-b border-white">
             <span
-              className={`text-xl font-bold text-white ${
-                !isOpen && "hidden"
-              }`}
+              className={`text-xl font-bold text-white ${!isOpen && "hidden"
+                }`}
             >
               Admin Panel
             </span>
@@ -47,7 +50,7 @@ const AdminSidebar = () => {
               onClick={() => setIsOpen(!isOpen)}
               className="hover:text-white hover:scale-[105%] cursor-pointer"
             >
-              {isOpen ? <X /> : <Menu />}
+              {isOpen ? <PanelLeftCloseIcon /> : <Menu />}
             </button>
           </div>
 
@@ -58,17 +61,14 @@ const AdminSidebar = () => {
                 <Link
                   key={idx}
                   to={tab.path}
-                  className={`flex items-center gap-3 px-4 py-3 hover:bg-red-950/60 transition ${
-                    isActive ? "bg-red-950/60 border-l-4 border-white" : ""
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-3 hover:bg-red-950/60 transition ${isActive ? "bg-red-950/60 border-l-4 border-white" : ""
+                    }`}
                 >
-                  <div className={`${
-                    isActive ? "text-white" : "text-white"
-                  }`}>{tab.icon}</div>
+                  <div className={`${isActive ? "text-white" : "text-white"
+                    }`}>{tab.icon}</div>
                   {isOpen && (
-                    <span className={`text-sm font-medium ${
-                      isActive ? "text-white" : "text-white"
-                    }`}>{tab.name}</span>
+                    <span className={`text-sm font-medium ${isActive ? "text-white" : "text-white"
+                      }`}>{tab.name}</span>
                   )}
                 </Link>
               );
@@ -88,9 +88,8 @@ const AdminSidebar = () => {
             <Link
               key={idx}
               to={tab.path}
-              className={`flex flex-col items-center text-xs transition-all ${
-                isActive ? "text-amber-400 font-bold" : "text-white hover:text-amber-500"
-              }`}
+              className={`flex flex-col items-center text-xs transition-all ${isActive ? "text-amber-400 font-bold" : "text-white hover:text-amber-500"
+                }`}
             >
               {tab.icon}
               <span className="mt-1">{tab.name}</span>

@@ -24,6 +24,7 @@ import Feedback from "./pages/feedback/feedback";
 import Questionnaire from "./components/questionaire/questionaire";
 import Certificate from "./components/questionaire/certificate";
 import CloudUpload from "./components/dashboard/cloudUpload";
+import CollectionsManager from "./components/dashboard/collectionManager";
 
 function App() {
 	return (
@@ -64,6 +65,7 @@ function App() {
 							<Route path="feedbackAdmin" element={<FeedbackAdmin />} />
 							<Route path="eventsAdmin" element={<EventsAdmin />} />
 							<Route path="cloudUpload" element={<CloudUpload />} />
+							<Route path="collectionManager" element={<CollectionsManager />} />
 						</Route>
 					</Route>
 

@@ -52,7 +52,6 @@ export async function uploadArtifact({
 // }
 
 
-// src\actions\collections.js
 export async function getCollections() {
     try {
         const response = await Api.get("/artifex-collections", {
@@ -82,6 +81,33 @@ export async function getCollections() {
             return [];
         }
     } catch (error) {
+        throw error;
+    }
+}
+
+export async function deleteArtifact(id) {
+    try {
+        // Use Api.delete() as per FrontQL docs
+        await Api.delete(`/artifex-collections/${id}`);
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting artifact:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function updateArtifact(id, data) {
+    try {
+        // Use Api.put() instead of Api.patch()
+        const response = await Api.put(`/artifex-collections/${id}`, {
+            body: {
+                ...data,
+                keywords: JSON.stringify(data.keywords),
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error updating artifact:', error);
         throw error;
     }
 }
