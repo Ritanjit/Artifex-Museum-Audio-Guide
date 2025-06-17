@@ -1,34 +1,15 @@
-// import { StrictMode } from "react";
-// import { BrowserRouter } from "react-router";
-// import { createRoot } from "react-dom/client";
-
-// import App from "@/App";
-// import Providers from "@/lib/providers/index.tsx";
-
-// import "@/globals.css";
-
-// createRoot(document.getElementById("root")!).render(
-// 	<StrictMode>
-// 		<Providers>
-// 			<BrowserRouter>
-// 				<App />
-// 			</BrowserRouter>
-// 		</Providers>
-// 	</StrictMode>
-// );
-
-
+// src/main.tsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import './globals.css'; // Tailwind and global styles
-import { ToastProvider } from "./lib/contexts/ToastContext"; // Toast Notification Message
-import { VisitorCounterProvider } from './lib/contexts/VisitorCounterContext';
+import './globals.css';
+import { ToastProvider } from "./lib/contexts/ToastContext";
+import { VisitorCounterProvider } from "./lib/contexts/VisitorCounterContext"; // Add this
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
 	<React.StrictMode>
 		<ToastProvider>
-			<VisitorCounterProvider>
+			<VisitorCounterProvider> {/* Wrap with provider */}
 				<App />
 			</VisitorCounterProvider>
 		</ToastProvider>

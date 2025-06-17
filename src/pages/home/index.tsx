@@ -1,7 +1,8 @@
 import Hero06 from "@/components/hero-06/hero-06";
 import HomeCollections from "../../components/collections/homeCollections";
-import HomeNewsHighlights from "@/components/bulletin/homeNews";
+// import HomeNewsHighlights from "@/components/bulletin/homeNews";
 import IntroInfoCard from "@/components/Introduction/intro";
+import HomeNewsEventsHighlights from "@/components/bulletin/homeNews";
 
 const HomePage = () => {
 
@@ -11,7 +12,7 @@ const HomePage = () => {
       < Hero06 />
       < IntroInfoCard />
       < HomeCollections />
-      < HomeNewsHighlights />
+      < HomeNewsEventsHighlights />
     </>
 
   );

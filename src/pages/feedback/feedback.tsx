@@ -1,6 +1,8 @@
+// src\pages\feedback\feedback.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../lib/contexts/ToastContext"; // ✅ make sure the path is correct
+import { submitFeedback } from "@/actions/feedback"; // Add this import
 
 export default function Feedback() {
     const navigate = useNavigate();
@@ -11,11 +13,26 @@ export default function Feedback() {
         navigate("/questionnaire");
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // Updated submit handler
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // ✅ Here you can send data to backend if needed
 
-        showToast("Thank you for your feedback!", "success");
+        const formData = new FormData(e.target as HTMLFormElement);
+        const feedbackData = {
+            name: formData.get('name') as string,
+            email: formData.get('email') as string,
+            rating,
+            message: formData.get('message') as string || '',
+        };
+
+        try {
+            await submitFeedback(feedbackData);
+            showToast("Thank you for your feedback!", "success");
+            setRating(0);
+            (e.target as HTMLFormElement).reset();
+        } catch (error) {
+            showToast("Failed to submit feedback. Please try again.", "error");
+        }
     };
 
     return (
@@ -36,6 +53,7 @@ export default function Feedback() {
                 >
                     <label className="text-sm text-red-900 dark:text-amber-500 mb-2 block">Full Name</label>
                     <input
+                        name="name" // Add name attribute
                         type="text"
                         placeholder="John Doe"
                         className="w-full p-3 rounded-md mb-4 border border-red-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-900 dark:text-white placeholder-gray-500 focus:ring-red-900 focus:border-red-900"
@@ -44,6 +62,7 @@ export default function Feedback() {
 
                     <label className="text-sm text-red-900 dark:text-amber-500 mb-2 block">Email</label>
                     <input
+                        name="email" // Add name attribute
                         type="email"
                         placeholder="example@email.com"
                         className="w-full p-3 rounded-md mb-4 border border-red-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-900 dark:text-white placeholder-gray-500 focus:ring-red-900 focus:border-red-900"
@@ -65,6 +84,7 @@ export default function Feedback() {
 
                     <label className="text-sm text-red-900 dark:text-amber-500 mb-2 block">Message (Optional)</label>
                     <textarea
+                        name="message" // Add name attribute
                         placeholder="Your feedback..."
                         className="w-full p-3 rounded-md mb-6 border border-red-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-900 dark:text-white placeholder-gray-500 focus:ring-red-900 focus:border-red-900 h-32"
                     ></textarea>
@@ -83,7 +103,7 @@ export default function Feedback() {
                         Earn a Digital Certificate !
                     </h2>
                     <p className="text-gray-700 dark:text-gray-400 mb-6">
-                        Get your certificate for the Audio Guided Course on<br/>
+                        Get your certificate for the Audio Guided Course on<br />
                         <span className="italic">
                             History of Majuli Mukha Making
                         </span>

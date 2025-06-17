@@ -3,14 +3,14 @@ import EventsCalendar from '@/components/bulletin/CalenderEvents'
 import LatestNewsBulletin from '@/components/bulletin/LatestNewsHeadlines'
 import React from 'react'
 
-const Event = () => {
-  return (
-    <>
-    {/* <NewsBulletin /> */}
-    {/* <LatestNewsBulletin /> */}
-    <EventsCalendar />
-    </>
-  )
+const News = () => {
+    return (
+        <>
+            {/* <NewsBulletin /> */}
+            <LatestNewsBulletin />
+            {/* <EventsCalendar /> */}
+        </>
+    )
 }
 
-export default Event
+export default News

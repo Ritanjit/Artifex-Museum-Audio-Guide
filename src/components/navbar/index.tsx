@@ -3,7 +3,7 @@ import { ModeToggle } from "@/components/theme-provider/mode-toggle";
 import horaiLogo from "../../assets/horaiLogo.png";
 import blankLogo from "../../assets/blank.png";
 import { Button } from "../ui/button";
-import { Home, Compass, Layers, Calendar, Info, ScanQrCode } from "lucide-react"; // Icons for bottom navbar
+import { Home, Compass, Layers, Calendar, Info, ScanQrCode, Handshake } from "lucide-react"; // Icons for bottom navbar
 import { useNavigate } from "react-router";
 import { useTheme } from "@/components/theme-provider/theme-provider"
 import { useLocation } from "react-router-dom";
@@ -59,6 +59,7 @@ const Navbar = () => {
           {/* <NavLink href="/player" label="PLAYER" /> */}
           <NavLink href="/collections" label="COLLECTIONS" />
           <NavLink href="/events" label="EVENTS" />
+          <NavLink href="/news" label="NEWS" />
           <NavLink href="/visit" label="VISIT" />
           <NavLink href="/feedback" label="FEEDBACK" />
           <NavLink href="/about" label="ABOUT US" />
@@ -94,7 +95,8 @@ const Navbar = () => {
         <NavItem href="/visit" icon={<Compass size={24} />} label="Visit" />
         <NavItem href="/collections" icon={<Layers size={24} />} label="Collections" />
         <NavItem href="/events" icon={<Calendar size={24} />} label="Event" />
-        <NavItem href="/feedback" icon={<Info size={24} />} label="Feedback" />
+        <NavItem href="/news" icon={<Info size={24} />} label="News" />
+        <NavItem href="/feedback" icon={<Handshake size={24} />} label="Feedback" />
       </div>
 
 

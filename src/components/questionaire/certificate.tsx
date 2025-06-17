@@ -1,18 +1,24 @@
+// src\components\questionaire\certificate.tsx
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import img from "../../assets/certificate.jpg"; // high-res image
+import { updateQuestionnaire } from "@/actions/questionnaire";
 
 export default function Certificate() {
     const location = useLocation();
     const navigate = useNavigate();
-    const name = location.state?.name || "Participant";
+    const { name, score, questionnaireId } = location.state || {};
 
     useEffect(() => {
-        if (!location.state?.name) {
+        // Only require name and questionnaireId
+        if (!name || !questionnaireId) {
             navigate("/");
+            // setTimeout(() => {
+            //     navigate("/certificate");
+            // }, 5000)
         }
-    }, [location.state, navigate]);
+    }, [name, questionnaireId, navigate]);
 
     const handleDownload = async () => {
         const pdf = new jsPDF({
@@ -30,23 +36,32 @@ export default function Certificate() {
 
         pdf.addImage(bgImage, "JPEG", 0, 0, 960, 540);
 
-        // Set name position (adjust Y to match visual position)
         pdf.setFont("Times", "bold");
-        pdf.setTextColor(255, 191, 0); // amber-like
+        pdf.setTextColor(255, 191, 0);
         pdf.setFontSize(28);
 
         const nameWidth = pdf.getTextWidth(name);
         const nameX = (960 - nameWidth) / 2;
-        const nameY = 290; // adjusted Y position — change this to match design
+        const nameY = 290;
 
         pdf.text(name, nameX, nameY);
 
-        // Add date (bottom-left, matching CSS position & amber color)
         pdf.setFontSize(18);
-        pdf.setTextColor(255, 191, 0); // RGB for amber-500
+        pdf.setTextColor(255, 191, 0);
         pdf.text(`Date: ${new Date().toLocaleDateString()}`, 170, 470);
 
         pdf.save(`${name.replace(/\s+/g, "_")}_Certificate.pdf`);
+
+        try {
+            // Update certificate collection status
+            if (questionnaireId) {
+                await updateQuestionnaire(questionnaireId, {
+                    collectedCertificate: true
+                });
+            }
+        } catch (error) {
+            console.error("Failed to update certificate status:", error);
+        }
     };
 
     return (

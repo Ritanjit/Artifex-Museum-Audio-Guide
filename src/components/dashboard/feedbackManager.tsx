@@ -1,5 +1,5 @@
-// src\components\dashboard\feedback.tsx
-import { useState } from 'react';
+// src\components\dashboard\feedbackManager.tsx
+import { useEffect, useState } from 'react';
 import {
     Card,
     CardContent,
@@ -20,108 +20,26 @@ import {
     Check,
     XCircle
 } from 'lucide-react';
+import { getAllFeedback } from '@/actions/feedback'; // Add this import
+import { getAllQuestionnaires } from '@/actions/questionnaire'; // Add this import
 
-const feedbackData = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', rating: 5, message: 'The course exceeded my expectations in every way. The content was thoughtfully structured, each module building upon the last in a meaningful progression. I particularly appreciated the interactive elements that kept me engaged throughout. Would definitely recommend!' },
-    { id: 2, name: 'Sandilya Baruah', email: 'sandilya@example.com', rating: 4, message: 'Very informative and user-friendly. I liked how clearly the topics were explained and supported with examples. A little more depth in some sections would make it even better, but overall a great learning experience.' },
-    { id: 3, name: 'Subhrajyoti Goswami', email: 'subhrajyoti@example.com', rating: 4, message: 'A great effort in putting together relevant and updated material. It gave me good insights and I learned things I didn’t know before. Some sections could be more detailed, but I’m satisfied with the course.' },
-    { id: 4, name: 'Ritanjit Das', email: 'ritanjit@example.com', rating: 5, message: 'Absolutely loved the visual aids and real-life examples! They made learning enjoyable and easy to grasp. The flow was smooth and intuitive. Thank you for such quality content!' },
-    { id: 5, name: 'Kumar Jigyas Pritam', email: 'kumar@example.com', rating: 5, message: 'Fantastic delivery! The instructor’s clarity and the platform’s interface worked perfectly together to make a smooth experience. Every topic felt like a step up without being overwhelming.' },
-    { id: 6, name: 'Rajjyoti Das', email: 'rajjyoti@example.com', rating: 4, message: 'Good balance of theory and practical use-cases. I found myself referring back to notes often. A few segments felt slightly rushed, but the overall approach was strong.' },
-    { id: 7, name: 'Subrata Goswami', email: 'subrata@example.com', rating: 5, message: 'This was one of the most well-organized courses I’ve taken. Every slide, video, and resource was useful. I appreciate the effort that went into designing this program. Great job!' },
-    { id: 8, name: 'Prasurjya Goswami', email: 'prasurjya@example.com', rating: 4, message: 'A reliable source of information for beginners. I liked the pace and how it gradually introduced new concepts. A little more advanced content would help learners progress further.' },
-    { id: 9, name: 'Deepak Kalita', email: 'deepak@example.com', rating: 4, message: 'Useful and concise. I liked the mix of visual explanations and quick quizzes. It helped me retain what I learned. A few glitches in the interface were distracting, though.' },
-    { id: 10, name: 'Vikram Mehta', email: 'vikram@example.com', rating: 5, message: 'Really impressed by the quality of examples used. The storytelling kept the sessions memorable. It’s clear a lot of thought went into crafting this course for learners like us.' },
-    { id: 11, name: 'Emily Johnson', email: 'emily@example.com', rating: 5, message: 'I found the sessions highly engaging. The flow of information and supporting materials helped me connect the dots better than any textbook. Kudos to the creators!' },
-    { id: 12, name: 'Rahul Verma', email: 'rahul@example.com', rating: 4, message: 'I gained clarity on several difficult concepts thanks to this course. The instructor’s tone was motivating and easy to follow. I’d suggest a few improvements to the navigation layout.' },
-    { id: 13, name: 'Sara Fernandes', email: 'sara@example.com', rating: 4, message: 'An effective way to learn new skills. I liked how practical the sessions felt. The examples were close to real-life problems and helped me apply knowledge immediately.' },
-    { id: 14, name: 'Nikhil Das', email: 'nikhil@example.com', rating: 5, message: 'This was such an enlightening experience! Everything was broken down logically, and the hands-on parts made a huge difference in my understanding. Highly recommended!' },
-    { id: 15, name: 'Aditi Banerjee', email: 'aditi@example.com', rating: 4, message: 'Great initiative with a lot of potential. I appreciated the smooth UI and prompt support responses. Including a few more advanced case studies would have made it even better.' }
-];
+interface Feedback {
+    id: number;
+    name: string;
+    email: string;
+    rating: number;
+    message: string;
+}
 
-const questionnaireData = [
-    {
-        id: 1,
-        name: 'John Doe',
-        email: 'john@example.com',
-        attempted: true,
-        correct: 8,
-        wrong: 2,
-        collectedCertificate: true,
-    },
-    {
-        id: 2,
-        name: 'Sandilya Barauh',
-        email: 'sandilya@example.com',
-        attempted: true,
-        correct: 6,
-        wrong: 4,
-        collectedCertificate: false,
-    },
-    {
-        id: 3,
-        name: 'Ritanjit Das',
-        email: 'ritanjit@example.com',
-        attempted: true,
-        correct: 9,
-        wrong: 1,
-        collectedCertificate: false,
-    },
-    {
-        id: 4,
-        name: 'Subhrajyoti Goswami',
-        email: 'subhrajyoti@example.com',
-        attempted: true,
-        correct: 8,
-        wrong: 2,
-        collectedCertificate: true,
-    },
-    {
-        id: 5,
-        name: 'Kumar Jigyas Pritam',
-        email: 'kumar@example.com',
-        attempted: true,
-        correct: 4,
-        wrong: 6,
-        collectedCertificate: true,
-    },
-    {
-        id: 6,
-        name: 'Subrata Goswami',
-        email: 'subrata@example.com',
-        attempted: true,
-        correct: 5,
-        wrong: 5,
-        collectedCertificate: true,
-    },
-    {
-        id: 7,
-        name: 'Prasurjya Goswami',
-        email: 'prasurjya@example.com',
-        attempted: true,
-        correct: 5,
-        wrong: 5,
-        collectedCertificate: false,
-    },
-    {
-        id: 8,
-        name: 'Rajjyoti Das',
-        email: 'rajjyoti@example.com',
-        attempted: true,
-        correct: 10,
-        wrong: 0,
-        collectedCertificate: true,
-    },
-    {
-        id: 9,
-        name: 'Deepak Kalita',
-        email: 'deepak@example.com',
-        attempted: true,
-        correct: 6,
-        wrong: 4,
-        collectedCertificate: true,
-    },
-];
+interface Questionnaire {
+    id: number;
+    name: string;
+    email: string;
+    attempted: boolean;
+    correct: number;
+    wrong: number;
+    collectedCertificate: boolean;
+}
 
 export default function FeedbackAdmin() {
     const [selectedFeedback, setSelectedFeedback] = useState<any>(null);
@@ -130,15 +48,13 @@ export default function FeedbackAdmin() {
     const [searchTerm, setSearchTerm] = useState('');
     const [certificateSearchTerm, setCertificateSearchTerm] = useState('');
 
-    // Calculate statistics
-    const totalFeedback = feedbackData.length;
-    const averageRating = (
-        feedbackData.reduce((sum, f) => sum + f.rating, 0) / totalFeedback
-    ).toFixed(1);
+    // Replace static data with API data
+    const [feedbackData, setFeedbackData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const totalQuestionnaires = questionnaireData.length;
-    const certificatesCollected = questionnaireData.filter(q => q.collectedCertificate).length;
-    const avgScore = (questionnaireData.reduce((sum, q) => sum + q.correct, 0) / (totalQuestionnaires * 10) * 100).toFixed(1);
+    // Replace static questionnaire data with API data
+    const [questionnaireData, setQuestionnaireData] = useState<any[]>([]);
+    const [loadingQuestionnaires, setLoadingQuestionnaires] = useState(false);
 
     // Filter feedback data based on search
     const filteredFeedback = feedbackData.filter(f =>
@@ -146,16 +62,107 @@ export default function FeedbackAdmin() {
         f.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    useEffect(() => {
+        if (activeTab === 'questionnaire') {
+            const fetchQuestionnaires = async () => {
+                setLoadingQuestionnaires(true);
+                try {
+                    // Update the getAllQuestionnaires call to:
+                    const data = await getAllQuestionnaires();
+                    setQuestionnaireData(data);
+                } catch (error) {
+                    console.error("Failed to load questionnaires:", error);
+                } finally {
+                    setLoadingQuestionnaires(false);
+                }
+            };
+
+            fetchQuestionnaires();
+        }
+    }, [activeTab]);
+
+    // Calculate statistics based on API data
+    const totalQuestionnaires = questionnaireData.length;
+    const certificatesCollected = questionnaireData.filter(q => q.collectedCertificate).length;
+    const avgScore = totalQuestionnaires > 0
+        ? (
+            questionnaireData.reduce((sum, q) => sum + parseFloat(q.score.replace('%', '')), 0) / totalQuestionnaires
+        ).toFixed(2)
+        : "0.00";
+
+    // old avgScore method
+    // const avgScore = totalQuestionnaires > 0
+    //     ? (questionnaireData.reduce((sum, q) => {
+    //         const totalQuestions = q.correct + q.wrong;
+    //         const score = totalQuestions > 0 ? (q.correct / totalQuestions) * 100 : 0;
+    //         return sum + score;
+    //     }, 0) / totalQuestionnaires).toFixed(1)
+    //     : "0.0";
+
+    // Filter questionnaires
     const filteredQuestionnaires = questionnaireData.filter(q =>
         q.name.toLowerCase().includes(certificateSearchTerm.toLowerCase()) ||
         q.email.toLowerCase().includes(certificateSearchTerm.toLowerCase())
     );
 
-    // Rating distribution
+    // Update rating distribution calculation
     const ratingDistribution = [0, 0, 0, 0, 0];
     feedbackData.forEach(f => {
-        ratingDistribution[f.rating - 1]++;
+        if (f.rating >= 1 && f.rating <= 5) {
+            ratingDistribution[f.rating - 1]++;
+        }
     });
+
+    useEffect(() => {
+        const fetchFeedback = async () => {
+            try {
+                const data = await getAllFeedback();
+                setFeedbackData(data);
+            } catch (error) {
+                console.error("Failed to load feedback:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFeedback();
+    }, []);
+
+    // Calculate statistics based on API data
+    const totalFeedback = feedbackData.length;
+    const averageRating = totalFeedback > 0
+        ? feedbackData.reduce((sum, f) => {
+            // Ensure rating is a number between 1-5
+            const rating = Math.min(5, Math.max(1, Number(f.rating) || 0));
+            return sum + rating;
+        }, 0) / totalFeedback
+        : 0;
+
+    // Debug logging to verify calculations
+    console.log('Feedback data:', feedbackData);
+    console.log('Total feedback:', totalFeedback);
+    console.log('Sum of ratings:', feedbackData.reduce((sum, f) => sum + (Number(f.rating) || 0), 0));
+    console.log('Calculated average:', averageRating);
+
+    // Format the average rating to 1 decimal place for display
+    const displayAverageRating = averageRating.toFixed(1);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-800 dark:border-amber-600"></div>
+            </div>
+        );
+    }
+
+    // Add loading state for questionnaires
+    if (showQuestionnaire && loadingQuestionnaires) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-800 dark:border-amber-600"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-6 bg-stone-100 dark:bg-gray-950 min-h-screen transition-all">
@@ -233,13 +240,15 @@ export default function FeedbackAdmin() {
                                         <div>
                                             <p className="text-gray-600 dark:text-gray-400">Average Rating</p>
                                             <div className="flex items-center mt-2">
-                                                <h3 className="text-3xl font-bold text-red-900 dark:text-white mr-2">{averageRating}</h3>
+                                                <h3 className="text-3xl font-bold text-red-900 dark:text-white mr-2">
+                                                    {displayAverageRating}
+                                                </h3>
                                                 <div className="flex">
                                                     {[...Array(5)].map((_, i) => (
                                                         <Star
                                                             key={i}
                                                             size={20}
-                                                            className={`${i < Math.floor(Number(averageRating)) ? 'text-amber-500 fill-amber-500' : 'text-gray-300'}`}
+                                                            className={`${i < Math.round(averageRating) ? 'text-amber-500 fill-amber-500' : 'text-gray-300'}`}
                                                         />
                                                     ))}
                                                 </div>
@@ -505,8 +514,13 @@ export default function FeedbackAdmin() {
                         {/* Certificate Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredQuestionnaires.map((user) => {
-                                const percentage = ((user.correct / 10) * 100).toFixed(1);
-                                const passed = user.correct >= 6;
+                                const percentage = user.score;
+                                const passed = user.passed;
+                                // const totalQuestions = user.correct + user.wrong;
+                                // const percentage = totalQuestions > 0
+                                //     ? parseFloat(((user.correct / totalQuestions) * 100).toFixed(1))
+                                //     : 0;
+                                // const passed = percentage >= 50;
 
                                 return (
                                     <Card
@@ -537,13 +551,16 @@ export default function FeedbackAdmin() {
 
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="bg-green-50 dark:bg-green-900/10 p-3 rounded-lg">
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Correct</p>
-                                                    <p className="text-xl font-bold text-green-700 dark:text-green-300">{user.correct}</p>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Score</p>
+                                                    <p className="text-xl font-bold text-green-700 dark:text-green-300">
+                                                        {percentage}%
+                                                    </p>
                                                 </div>
-
                                                 <div className="bg-red-50 dark:bg-red-900/10 p-3 rounded-lg">
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Wrong</p>
-                                                    <p className="text-xl font-bold text-red-700 dark:text-red-300">{user.wrong}</p>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
+                                                    <p className="text-xl font-bold text-red-700 dark:text-red-300">
+                                                        {passed ? 'Passed' : 'Failed'}
+                                                    </p>
                                                 </div>
                                             </div>
 
@@ -570,11 +587,11 @@ export default function FeedbackAdmin() {
                                                         Certificate {user.collectedCertificate ? 'Collected' : 'Not Collected'}
                                                     </span>
                                                 </div>
-                                                {!user.collectedCertificate && (
+                                                {/* {!user.collectedCertificate && (
                                                     <button className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-2 py-1 rounded">
                                                         Send Reminder
                                                     </button>
-                                                )}
+                                                )} */}
                                             </div>
                                         </CardContent>
                                     </Card>
@@ -587,3 +604,107 @@ export default function FeedbackAdmin() {
         </div>
     );
 }
+
+
+// hardset questions -->
+// const feedbackData = [
+//     { id: 1, name: 'John Doe', email: 'john@example.com', rating: 5, message: 'The course exceeded my expectations in every way. The content was thoughtfully structured, each module building upon the last in a meaningful progression. I particularly appreciated the interactive elements that kept me engaged throughout. Would definitely recommend!' },
+//     { id: 2, name: 'Sandilya Baruah', email: 'sandilya@example.com', rating: 4, message: 'Very informative and user-friendly. I liked how clearly the topics were explained and supported with examples. A little more depth in some sections would make it even better, but overall a great learning experience.' },
+//     { id: 3, name: 'Subhrajyoti Goswami', email: 'subhrajyoti@example.com', rating: 4, message: 'A great effort in putting together relevant and updated material. It gave me good insights and I learned things I didn’t know before. Some sections could be more detailed, but I’m satisfied with the course.' },
+//     { id: 4, name: 'Ritanjit Das', email: 'ritanjit@example.com', rating: 5, message: 'Absolutely loved the visual aids and real-life examples! They made learning enjoyable and easy to grasp. The flow was smooth and intuitive. Thank you for such quality content!' },
+//     { id: 5, name: 'Kumar Jigyas Pritam', email: 'kumar@example.com', rating: 5, message: 'Fantastic delivery! The instructor’s clarity and the platform’s interface worked perfectly together to make a smooth experience. Every topic felt like a step up without being overwhelming.' },
+//     { id: 6, name: 'Rajjyoti Das', email: 'rajjyoti@example.com', rating: 4, message: 'Good balance of theory and practical use-cases. I found myself referring back to notes often. A few segments felt slightly rushed, but the overall approach was strong.' },
+//     { id: 7, name: 'Subrata Goswami', email: 'subrata@example.com', rating: 5, message: 'This was one of the most well-organized courses I’ve taken. Every slide, video, and resource was useful. I appreciate the effort that went into designing this program. Great job!' },
+//     { id: 8, name: 'Prasurjya Goswami', email: 'prasurjya@example.com', rating: 4, message: 'A reliable source of information for beginners. I liked the pace and how it gradually introduced new concepts. A little more advanced content would help learners progress further.' },
+//     { id: 9, name: 'Deepak Kalita', email: 'deepak@example.com', rating: 4, message: 'Useful and concise. I liked the mix of visual explanations and quick quizzes. It helped me retain what I learned. A few glitches in the interface were distracting, though.' },
+//     { id: 10, name: 'Vikram Mehta', email: 'vikram@example.com', rating: 5, message: 'Really impressed by the quality of examples used. The storytelling kept the sessions memorable. It’s clear a lot of thought went into crafting this course for learners like us.' },
+//     { id: 11, name: 'Emily Johnson', email: 'emily@example.com', rating: 5, message: 'I found the sessions highly engaging. The flow of information and supporting materials helped me connect the dots better than any textbook. Kudos to the creators!' },
+//     { id: 12, name: 'Rahul Verma', email: 'rahul@example.com', rating: 4, message: 'I gained clarity on several difficult concepts thanks to this course. The instructor’s tone was motivating and easy to follow. I’d suggest a few improvements to the navigation layout.' },
+//     { id: 13, name: 'Sara Fernandes', email: 'sara@example.com', rating: 4, message: 'An effective way to learn new skills. I liked how practical the sessions felt. The examples were close to real-life problems and helped me apply knowledge immediately.' },
+//     { id: 14, name: 'Nikhil Das', email: 'nikhil@example.com', rating: 5, message: 'This was such an enlightening experience! Everything was broken down logically, and the hands-on parts made a huge difference in my understanding. Highly recommended!' },
+//     { id: 15, name: 'Aditi Banerjee', email: 'aditi@example.com', rating: 4, message: 'Great initiative with a lot of potential. I appreciated the smooth UI and prompt support responses. Including a few more advanced case studies would have made it even better.' }
+// ];
+
+// const questionnaireData = [
+//     {
+//         id: 1,
+//         name: 'John Doe',
+//         email: 'john@example.com',
+//         attempted: true,
+//         correct: 8,
+//         wrong: 2,
+//         collectedCertificate: true,
+//     },
+//     {
+//         id: 2,
+//         name: 'Sandilya Barauh',
+//         email: 'sandilya@example.com',
+//         attempted: true,
+//         correct: 6,
+//         wrong: 4,
+//         collectedCertificate: false,
+//     },
+//     {
+//         id: 3,
+//         name: 'Ritanjit Das',
+//         email: 'ritanjit@example.com',
+//         attempted: true,
+//         correct: 9,
+//         wrong: 1,
+//         collectedCertificate: false,
+//     },
+//     {
+//         id: 4,
+//         name: 'Subhrajyoti Goswami',
+//         email: 'subhrajyoti@example.com',
+//         attempted: true,
+//         correct: 8,
+//         wrong: 2,
+//         collectedCertificate: true,
+//     },
+//     {
+//         id: 5,
+//         name: 'Kumar Jigyas Pritam',
+//         email: 'kumar@example.com',
+//         attempted: true,
+//         correct: 4,
+//         wrong: 6,
+//         collectedCertificate: true,
+//     },
+//     {
+//         id: 6,
+//         name: 'Subrata Goswami',
+//         email: 'subrata@example.com',
+//         attempted: true,
+//         correct: 5,
+//         wrong: 5,
+//         collectedCertificate: true,
+//     },
+//     {
+//         id: 7,
+//         name: 'Prasurjya Goswami',
+//         email: 'prasurjya@example.com',
+//         attempted: true,
+//         correct: 5,
+//         wrong: 5,
+//         collectedCertificate: false,
+//     },
+//     {
+//         id: 8,
+//         name: 'Rajjyoti Das',
+//         email: 'rajjyoti@example.com',
+//         attempted: true,
+//         correct: 10,
+//         wrong: 0,
+//         collectedCertificate: true,
+//     },
+//     {
+//         id: 9,
+//         name: 'Deepak Kalita',
+//         email: 'deepak@example.com',
+//         attempted: true,
+//         correct: 6,
+//         wrong: 4,
+//         collectedCertificate: true,
+//     },
+// ];

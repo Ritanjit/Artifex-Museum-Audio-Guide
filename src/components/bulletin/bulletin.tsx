@@ -1,3 +1,4 @@
+// src\components\bulletin\bulletin.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { CalendarDays, CalendarCheck, Clock, X } from 'lucide-react';
 import Calendar from 'react-calendar';
@@ -9,7 +10,7 @@ interface NewsItem {
   date: string;
 }
 
-const LatestNewsBulletin = () => {
+const NewsBulletin = () => {
   const [news] = useState<NewsItem[]>([
     { id: 1, date: 'Mar 28', headline: 'Rare Ahom Manuscript Discovered in Upper Assam' },
     { id: 2, date: 'Mar 26', headline: 'New Exhibit: The Ancient Scripts of the Ahom Dynasty' },
@@ -189,4 +190,4 @@ const LatestNewsBulletin = () => {
   );
 };
 
-export default LatestNewsBulletin;
+export default NewsBulletin;

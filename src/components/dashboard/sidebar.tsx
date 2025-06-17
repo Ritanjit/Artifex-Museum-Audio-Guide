@@ -11,19 +11,26 @@ import {
   Home,
   CloudUpload,
   UserPen,
+  FileAudio,
+  UserRoundPen,
+  CircleFadingArrowUp,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { PanelLeftCloseIcon } from "../ui/panelClose"
 import { HomeIcon } from "../../components/ui/home"
+import AdminVisitorCounter from "../visitorCounter/AdminVisitorCounter";
 
 const tabs = [
   { name: "Home", icon: <HomeIcon size={24} />, path: "/admin" },
-  { name: "Upload", icon: <Upload size={24} />, path: "/admin/upload" },
-  { name: "Manager", icon: <UserPen size={24} />, path: "/admin/collectionManager" },
+  { name: "Upload", icon: <CircleFadingArrowUp size={24} />, path: "/admin/uploadManager" },
+  { name: "Manager", icon: <UserRoundPen size={24} />, path: "/admin/artifactManager" },
+  // { name: "Upload", icon: <Upload size={24} />, path: "/admin/upload" },
+  // { name: "Collection Manager", icon: <UserPen size={24} />, path: "/admin/collectionManager" },
   { name: "Feedback", icon: <MessageSquare size={24} />, path: "/admin/feedbackAdmin" },
   { name: "Events", icon: <CalendarCheck size={24} />, path: "/admin/eventsAdmin" },
-  { name: "Audio Player", icon: <Music size={24} />, path: "/admin/playerAdmin" },
-  { name: "Cloud Upload", icon: <CloudUpload size={24} />, path: "/admin/cloudUpload" },
+  // { name: "Audio Player", icon: <Music size={24} />, path: "/admin/playerAdmin" },
+  // { name: "Audio Manager", icon: <FileAudio size={24} />, path: "/admin/audioManager" },
+  { name: "Cloud", icon: <CloudUpload size={24} />, path: "/admin/cloudUpload" },
 ];
 
 const AdminSidebar = () => {
@@ -74,6 +81,12 @@ const AdminSidebar = () => {
               );
             })}
           </nav>
+
+          {/* Visitor Counter at the bottom of the sidebar */}
+          <div className={`p-4 border-t border-white ${!isOpen ? "hidden" : ""}`}>
+            <AdminVisitorCounter />
+          </div>
+
         </div>
       </div>
 

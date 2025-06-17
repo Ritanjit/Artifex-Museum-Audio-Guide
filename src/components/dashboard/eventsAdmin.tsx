@@ -1,3 +1,4 @@
+// src\components\dashboard\eventsAdmin.tsx
 import React, { useState } from "react";
 import { X, Plus, Trash2, Calendar as CalendarIcon, Newspaper, Bell, ChevronLeft, ChevronRight } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from "date-fns";

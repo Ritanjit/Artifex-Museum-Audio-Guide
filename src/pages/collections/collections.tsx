@@ -1,17 +1,20 @@
-// src\pages\collections\collections.tsx
+// src/pages/collections/collections.tsx
 import CollectionsBanner from "@/components/collections/collectionsBanner";
 import FloatingSearchBar from "@/components/searchbar";
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { getCollections } from "@/actions/collections";
+import { useNavigate, useLocation } from "react-router-dom";
+import { getAllArtifacts } from "@/actions/upload";
 
-// Define the structure of a collection item
-interface CollectionItem {
+// Define the structure of an artifact item
+interface ArtifactItem {
   id: string;
   name: string;
   category: string;
   keywords: string[];
   imageUrl: string;
+  english_audio_url?: string;
+  hindi_audio_url?: string;
+  assamese_audio_url?: string;
 }
 
 const Collections: React.FC = () => {
@@ -23,27 +26,27 @@ const Collections: React.FC = () => {
   const [showAll, setShowAll] = useState<{ [key: string]: boolean }>({});
   const [searchError, setSearchError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [collectionsData, setCollectionsData] = useState<CollectionItem[]>([]);
+  const [artifactsData, setArtifactsData] = useState<ArtifactItem[]>([]);
   const [apiError, setApiError] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch collections from API
+  // Fetch artifacts from API
   useEffect(() => {
-    const fetchCollections = async () => {
+    const fetchArtifacts = async () => {
       try {
         setIsLoading(true);
-        const data = await getCollections(); // Directly get the array
-        setCollectionsData(data);
+        const data = await getAllArtifacts();
+        setArtifactsData(data);
         setApiError(false);
       } catch (err) {
-        console.error("Error fetching collections:", err);
+        console.error("Error fetching artifacts:", err);
         setApiError(true);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCollections();
+    fetchArtifacts();
   }, []);
 
   const handleSearch = () => {
@@ -55,79 +58,67 @@ const Collections: React.FC = () => {
     navigate(`/collections?search=${encodeURIComponent(searchQuery)}`);
   };
 
-  // Group collections by category
-  const groupedCollections = collectionsData.reduce((acc, item) => {
+  // Group artifacts by category
+  const groupedArtifacts = artifactsData.reduce((acc, item) => {
     if (!acc[item.category]) {
       acc[item.category] = [];
     }
     acc[item.category].push({
       src: item.imageUrl,
       name: item.name,
-      id: item.id
+      id: item.id,
+      has_audio: !!(
+        item.english_audio_url ||
+        item.hindi_audio_url ||
+        item.assamese_audio_url
+      )
     });
     return acc;
-  }, {} as Record<string, Array<{ src: string; name: string; id: string }>>);
+  }, {} as Record<string, Array<{
+    src: string;
+    name: string;
+    id: string;
+    has_audio?: boolean;
+  }>>);
 
   // Convert grouped object to array format
-  const collectionSections = Object.entries(groupedCollections).map(
+  const artifactSections = Object.entries(groupedArtifacts).map(
     ([title, items]) => ({
       title,
       items
     })
   );
 
-  // Filter collections based on search query
-  // const filteredCollections = collectionSections
-  //   .map((collection) => {
-  //     const filteredItems = collection.items.filter((item) =>
-  //       item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  //     );
-  //     return { ...collection, items: filteredItems };
-  //   })
-  //   .filter((collection) => collection.items.length > 0);
-  
-
-  // Filter collections based on search query
-  const filteredCollections = collectionSections
-    .map((collection) => {
-      const filteredItems = collection.items.filter((item) => {
-        const collectionItem = collectionsData.find(ci => ci.id === item.id);
-        if (!collectionItem) return false;
+  // Filter artifacts based on search query
+  const filteredArtifacts = artifactSections
+    .map((section) => {
+      const filteredItems = section.items.filter((item) => {
+        const artifactItem = artifactsData.find(ai => ai.id === item.id);
+        if (!artifactItem) return false;
 
         return (
           item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          collectionItem.keywords.some(kw =>
+          artifactItem.keywords.some(kw =>
             kw.toLowerCase().includes(searchQuery.toLowerCase())
           ) ||
-          collectionItem.category.toLowerCase().includes(searchQuery.toLowerCase())
+          artifactItem.category.toLowerCase().includes(searchQuery.toLowerCase())
         );
       });
-      return { ...collection, items: filteredItems };
+      return { ...section, items: filteredItems };
     })
-    .filter((collection) => collection.items.length > 0);
-
+    .filter((section) => section.items.length > 0);
 
   return (
     <div className="bg-stone-100 dark:bg-black min-h-screen text-red-900 dark:text-white pb-15">
       <CollectionsBanner />
 
-      {/* <div className="mt-20">
-        <FloatingSearchBar
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          handleSearch={handleSearch}
-          showPrompt={true}
-        />
-      </div> */}
-
-        <FloatingSearchBar
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          handleSearch={handleSearch}
-          showPrompt={true}
-          // Pass collections data to searchbar
-          collectionsData={collectionsData}
-        />
+      <FloatingSearchBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        handleSearch={handleSearch}
+        showPrompt={true}
+        collectionsData={artifactsData}
+      />
 
       {searchError && (
         <div className="flex justify-center mt-2">
@@ -141,27 +132,22 @@ const Collections: React.FC = () => {
         {isLoading ? (
           <div className="mt-20 flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mb-4"></div>
-            <p className="text-gray-500 dark:text-gray-400">Loading collections...</p>
+            <p className="text-gray-500 dark:text-gray-400">Loading artifacts...</p>
           </div>
         ) : apiError ? (
           <div className="text-center py-20">
             <div className="text-4xl mb-4">⚠️</div>
-            <h3 className="text-xl font-bold mb-2">Failed to Load Collections</h3>
+            <h3 className="text-xl font-bold mb-2">Failed to Load Artifacts</h3>
             <p className="text-gray-500 dark:text-gray-400">
               Please try again later.
             </p>
           </div>
-        ) : filteredCollections.length > 0 ? (
-          filteredCollections.map((section) => {
+        ) : filteredArtifacts.length > 0 ? (
+          filteredArtifacts.map((section) => {
             const isExpanded = showAll[section.title] || false;
             const displayedItems = isExpanded
               ? section.items
               : section.items.slice(0, 5);
-
-            // Reset showAll state when search changes
-            // useEffect(() => {
-            //   setShowAll({});
-            // }, [searchQuery]);
 
             return (
               <section key={section.title} className="mt-25 fade-in">
@@ -190,10 +176,10 @@ const Collections: React.FC = () => {
                       onClick={(e) => {
                         e.preventDefault();
                         window.scrollTo({ top: 0, behavior: "smooth" });
-                        // Slight delay to allow smooth scroll before navigating
+
+                        // Always navigate to audio player with artifact ID
                         setTimeout(() => {
-                          navigate(`/audioplayer`);
-                          // navigate(`/audioplayer/${item.id}`);
+                          navigate(`/audioplayer/${item.id}`);
                         }, 300);
                       }}
                       className="block cursor-pointer"
@@ -237,7 +223,7 @@ const Collections: React.FC = () => {
         ) : (
           <div className="text-center py-20">
             <div className="text-4xl mb-4">🔍</div>
-            <h3 className="text-xl font-bold mb-2">No Collections Found</h3>
+            <h3 className="text-xl font-bold mb-2">No Artifacts Found</h3>
             <p className="text-gray-500 dark:text-gray-400">
               {searchQuery
                 ? `No results for "${searchQuery}". Try another search term.`
@@ -251,6 +237,277 @@ const Collections: React.FC = () => {
 };
 
 export default Collections;
+
+// // src\pages\collections\collections.tsx
+// import CollectionsBanner from "@/components/collections/collectionsBanner";
+// import FloatingSearchBar from "@/components/searchbar";
+// import React, { useState, useEffect } from "react";
+// import { useNavigate, Link, useLocation } from "react-router-dom";
+// import { getCollections } from "@/actions/collections";
+
+// // Define the structure of a collection item
+// interface CollectionItem {
+//   id: string;
+//   name: string;
+//   category: string;
+//   keywords: string[];
+//   imageUrl: string;
+//   has_audio?: boolean; // Add this
+//   audio_guide_id?: string; // Add this
+// }
+
+// const Collections: React.FC = () => {
+//   const location = useLocation();
+//   const params = new URLSearchParams(location.search);
+//   const initialSearchQuery = params.get("search") || "";
+
+//   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+//   const [showAll, setShowAll] = useState<{ [key: string]: boolean }>({});
+//   const [searchError, setSearchError] = useState(false);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [collectionsData, setCollectionsData] = useState<CollectionItem[]>([]);
+//   const [apiError, setApiError] = useState(false);
+//   const navigate = useNavigate();
+
+//   // Fetch collections from API
+//   useEffect(() => {
+//     const fetchCollections = async () => {
+//       try {
+//         setIsLoading(true);
+//         const data = await getCollections(); // Directly get the array
+//         setCollectionsData(data);
+//         setApiError(false);
+//       } catch (err) {
+//         console.error("Error fetching collections:", err);
+//         setApiError(true);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
+
+//     fetchCollections();
+//   }, []);
+
+//   const handleSearch = () => {
+//     if (!searchQuery.trim()) {
+//       setSearchError(true);
+//       setTimeout(() => setSearchError(false), 2000);
+//       return;
+//     }
+//     navigate(`/collections?search=${encodeURIComponent(searchQuery)}`);
+//   };
+
+//   // Group collections by category
+//   const groupedCollections = collectionsData.reduce((acc, item) => {
+//     if (!acc[item.category]) {
+//       acc[item.category] = [];
+//     }
+//     acc[item.category].push({
+//       src: item.imageUrl,
+//       name: item.name,
+//       id: item.id,
+//       has_audio: item.has_audio, // Add this
+//       audio_guide_id: item.audio_guide_id // Add this
+//     });
+//     return acc;
+//   }, {} as Record<string, Array<{
+//     src: string;
+//     name: string;
+//     id: string;
+//     has_audio?: boolean;
+//     audio_guide_id?: string;
+//   }>>);
+
+//   // Convert grouped object to array format
+//   const collectionSections = Object.entries(groupedCollections).map(
+//     ([title, items]) => ({
+//       title,
+//       items
+//     })
+//   );
+
+//   // Filter collections based on search query
+//   // const filteredCollections = collectionSections
+//   //   .map((collection) => {
+//   //     const filteredItems = collection.items.filter((item) =>
+//   //       item.name.toLowerCase().includes(searchQuery.toLowerCase())
+//   //     );
+//   //     return { ...collection, items: filteredItems };
+//   //   })
+//   //   .filter((collection) => collection.items.length > 0);
+
+
+//   // Filter collections based on search query
+//   const filteredCollections = collectionSections
+//     .map((collection) => {
+//       const filteredItems = collection.items.filter((item) => {
+//         const collectionItem = collectionsData.find(ci => ci.id === item.id);
+//         if (!collectionItem) return false;
+
+//         return (
+//           item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//           collectionItem.keywords.some(kw =>
+//             kw.toLowerCase().includes(searchQuery.toLowerCase())
+//           ) ||
+//           collectionItem.category.toLowerCase().includes(searchQuery.toLowerCase())
+//         );
+//       });
+//       return { ...collection, items: filteredItems };
+//     })
+//     .filter((collection) => collection.items.length > 0);
+
+
+//   return (
+//     <div className="bg-stone-100 dark:bg-black min-h-screen text-red-900 dark:text-white pb-15">
+//       <CollectionsBanner />
+
+//       {/* <div className="mt-20">
+//         <FloatingSearchBar
+//           searchQuery={searchQuery}
+//           setSearchQuery={setSearchQuery}
+//           handleSearch={handleSearch}
+//           showPrompt={true}
+//         />
+//       </div> */}
+
+//       <FloatingSearchBar
+//         searchQuery={searchQuery}
+//         setSearchQuery={setSearchQuery}
+//         handleSearch={handleSearch}
+//         showPrompt={true}
+//         // Pass collections data to searchbar
+//         collectionsData={collectionsData}
+//       />
+
+//       {searchError && (
+//         <div className="flex justify-center mt-2">
+//           <div className="bg-red-500 text-white text-sm px-3 py-2 rounded shadow-md">
+//             Please enter a search query!
+//           </div>
+//         </div>
+//       )}
+
+//       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+//         {isLoading ? (
+//           <div className="mt-20 flex flex-col items-center">
+//             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mb-4"></div>
+//             <p className="text-gray-500 dark:text-gray-400">Loading collections...</p>
+//           </div>
+//         ) : apiError ? (
+//           <div className="text-center py-20">
+//             <div className="text-4xl mb-4">⚠️</div>
+//             <h3 className="text-xl font-bold mb-2">Failed to Load Collections</h3>
+//             <p className="text-gray-500 dark:text-gray-400">
+//               Please try again later.
+//             </p>
+//           </div>
+//         ) : filteredCollections.length > 0 ? (
+//           filteredCollections.map((section) => {
+//             const isExpanded = showAll[section.title] || false;
+//             const displayedItems = isExpanded
+//               ? section.items
+//               : section.items.slice(0, 5);
+
+//             // Reset showAll state when search changes
+//             // useEffect(() => {
+//             //   setShowAll({});
+//             // }, [searchQuery]);
+
+//             return (
+//               <section key={section.title} className="mt-25 fade-in">
+//                 <div className="flex justify-between items-center mb-6">
+//                   <h2 className="text-3xl font-bold">{section.title}</h2>
+//                   {section.items.length > 4 && (
+//                     <button
+//                       onClick={() =>
+//                         setShowAll((prev) => ({
+//                           ...prev,
+//                           [section.title]: !isExpanded,
+//                         }))
+//                       }
+//                       className="text-lg font-bold text-red-900 hover:text-amber-500 dark:text-gray-300
+//                       dark:hover:text-white underline cursor-pointer"
+//                     >
+//                       {isExpanded ? "Show Less" : "Show All"}
+//                     </button>
+//                   )}
+//                 </div>
+
+//                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
+//                   {displayedItems.map((item) => (
+//                     <div
+//                       key={item.name}
+//                       onClick={(e) => {
+//                         e.preventDefault();
+//                         window.scrollTo({ top: 0, behavior: "smooth" });
+
+//                         // Use dynamic route if audio exists
+//                         if (item.has_audio) {
+//                           setTimeout(() => {
+//                             navigate(`/audioplayer/${item.id}`);
+//                           }, 300);
+//                         } else {
+//                           // Fallback to static player
+//                           setTimeout(() => {
+//                             navigate("/audioplayer");
+//                           }, 300);
+//                         }
+//                       }}
+//                       className="block cursor-pointer"
+//                     >
+//                       <div className="relative group rounded-2xl overflow-hidden w-full h-[280px] sm:h-[300px]
+//                       md:h-[340px] shadow-md hover:shadow-lg transition duration-500">
+//                         {item.src ? (
+//                           <img
+//                             src={item.src}
+//                             alt={item.name}
+//                             className="rounded-xl object-cover w-full h-full transition-all duration-500 ease-in-out
+//                             transform group-hover:scale-105"
+//                           />
+//                         ) : (
+//                           <div className="bg-gray-200 dark:bg-zinc-800 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+//                             <span className="text-gray-500">No image</span>
+//                           </div>
+//                         )}
+//                         <div
+//                           className="absolute z-10 bottom-3 left-0 mx-2 p-2 bg-red-900 dark:bg-white/60
+//                           backdrop-blur-lg w-[calc(100%-16px)] border border-white dark:border-black
+//                           rounded-lg shadow-sm shadow-transparent transition-all duration-500
+//                           group-hover:shadow-indigo-200 dark:group-hover:bg-amber-500"
+//                         >
+//                           <h6 className="font-semibold text-sm leading-6 text-white group-hover:text-amber-500
+//                           dark:text-black text-center">
+//                             {item.name}
+//                           </h6>
+//                           <p className="text-xs leading-5 text-gray-200 dark:text-gray-800 text-center
+//                           group-hover:text-amber-500/80">
+//                             {section.title} Collection
+//                           </p>
+//                         </div>
+//                       </div>
+//                     </div>
+//                   ))}
+//                 </div>
+//               </section>
+//             );
+//           })
+//         ) : (
+//           <div className="text-center py-20">
+//             <div className="text-4xl mb-4">🔍</div>
+//             <h3 className="text-xl font-bold mb-2">No Collections Found</h3>
+//             <p className="text-gray-500 dark:text-gray-400">
+//               {searchQuery
+//                 ? `No results for "${searchQuery}". Try another search term.`
+//                 : "The collection is currently empty."}
+//             </p>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Collections;
 
 
 

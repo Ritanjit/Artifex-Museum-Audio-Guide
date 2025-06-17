@@ -1,6 +1,8 @@
+// src\components\questionaire\questionaire.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../lib/contexts/ToastContext";
+import { submitQuestionnaire } from "@/actions/questionnaire";
 
 export default function Questionnaire() {
     const navigate = useNavigate();
@@ -10,17 +12,21 @@ export default function Questionnaire() {
     const [answers, setAnswers] = useState(Array(10).fill(""));
     const [showResults, setShowResults] = useState(false);
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleOptionChange = (index: number, value: string) => {
         const newAnswers = [...answers];
         newAnswers[index] = value;
         setAnswers(newAnswers);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!name.trim() || !email.trim()) {
             showToast("Please fill in both Name and Email before submitting.", "error");
             return;
         }
+
+        setIsSubmitting(true);
 
         // Calculate score
         let score = 0;
@@ -28,20 +34,41 @@ export default function Questionnaire() {
             if (answer === correctAnswers[index]) score++;
         });
         const percentage = (score / questions.length) * 100;
+        const passed = percentage >= 50;
 
-        if (percentage >= 50) {
-            showToast(`Congratulations! You scored ${percentage.toFixed(0)}% and passed.`, "success");
-            // Scroll to top before navigation
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
+        try {
+            // Submit to FrontQL and get ID
+            const response: any = await submitQuestionnaire({
+                name,
+                email,
+                score: percentage,
+                passed,
+                collectedCertificate: false
             });
-            setTimeout(() => {
-                navigate("/certificate", { state: { name, score: percentage } });
-            }, 1500);
-        } else {
-            showToast(`Too many wrong answers (${percentage.toFixed(0)}%). Please try again.`, "error");
-            setShowResults(true);
+
+            // Extract ID based on API response
+            const questionnaireId = response.result?.lastInsertID || response.result?.sLastInsertID;
+
+            if (passed) {
+                showToast(`Congratulations! You scored ${percentage.toFixed(0)}% and passed.`, "success");
+
+                // Navigate directly to certificate page
+                navigate("/certificate", {
+                    state: {
+                        name,
+                        // score: percentage,
+                        questionnaireId
+                    }
+                });
+            } else {
+                showToast(`Too many wrong answers (${percentage.toFixed(0)}%). Please try again.`, "error");
+                setShowResults(true);
+            }
+        } catch (error) {
+            showToast("Failed to submit questionnaire. Please try again.", "error");
+            console.error("Submission error:", error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -62,42 +89,42 @@ export default function Questionnaire() {
             question: "Which river separates Majuli from the mainland of Assam?",
             options: ["Brahmaputra", "Barak", "Manas", "Subansiri"],
         },
-        {
-            question: "Mukha (masks) from Majuli are primarily associated with which art form?",
-            options: ["Bihu Dance", "Sattriya Dance", "Ojapali", "Bhaona"],
-        },
-        {
-            question: "What material is traditionally used to make the base of Majuli Mukha?",
-            options: ["Clay", "Wood", "Bamboo and cloth", "Metal"],
-        },
-        {
-            question: "Which Sattras in Majuli are particularly renowned for their Mukha making traditions?",
-            options: ["Auniati Satra", "Garmur Satra", "Samaguri Satra", "Dakhinpat Satra"],
-        },
-        {
-            question: "Assamese manuscripts are often written on which unique material?",
-            options: ["Palm leaves", "Paper made from bamboo", "Sanchi Pat (bark of the Sanchi tree)", "Cloth"],
-        },
-        {
-            question: "What is the traditional script used for writing Assamese manuscripts?",
-            options: ["Devanagari", "Bengali script", "Assamese script (Buranjis style)", "Odia script"],
-        },
-        {
-            question: "Many Assamese manuscripts are preserved in which religious institutions?",
-            options: ["Temples", "Mosques", "Sattras", "Gurdwaras"],
-        },
-        {
-            question: "Which of the following is a common theme found in Assamese manuscripts?",
-            options: ["Ancient Roman history", "European folklore", "Vaishnavite devotional literature and epics", "Chinese philosophy"],
-        },
-        {
-            question: "The art of Majuli Mukha making is primarily passed down through which method?",
-            options: ["Formal university courses", "Apprenticeship within families and Sattras", "Online tutorials", "International workshops"],
-        },
-        {
-            question: "What historical period saw a significant flourishing of Assamese manuscript writing?",
-            options: ["Mauryan period", "Gupta period", "Ahom period", "Mughal period"],
-        },
+        // {
+        //     question: "Mukha (masks) from Majuli are primarily associated with which art form?",
+        //     options: ["Bihu Dance", "Sattriya Dance", "Ojapali", "Bhaona"],
+        // },
+        // {
+        //     question: "What material is traditionally used to make the base of Majuli Mukha?",
+        //     options: ["Clay", "Wood", "Bamboo and cloth", "Metal"],
+        // },
+        // {
+        //     question: "Which Sattras in Majuli are particularly renowned for their Mukha making traditions?",
+        //     options: ["Auniati Satra", "Garmur Satra", "Samaguri Satra", "Dakhinpat Satra"],
+        // },
+        // {
+        //     question: "Assamese manuscripts are often written on which unique material?",
+        //     options: ["Palm leaves", "Paper made from bamboo", "Sanchi Pat (bark of the Sanchi tree)", "Cloth"],
+        // },
+        // {
+        //     question: "What is the traditional script used for writing Assamese manuscripts?",
+        //     options: ["Devanagari", "Bengali script", "Assamese script (Buranjis style)", "Odia script"],
+        // },
+        // {
+        //     question: "Many Assamese manuscripts are preserved in which religious institutions?",
+        //     options: ["Temples", "Mosques", "Sattras", "Gurdwaras"],
+        // },
+        // {
+        //     question: "Which of the following is a common theme found in Assamese manuscripts?",
+        //     options: ["Ancient Roman history", "European folklore", "Vaishnavite devotional literature and epics", "Chinese philosophy"],
+        // },
+        // {
+        //     question: "The art of Majuli Mukha making is primarily passed down through which method?",
+        //     options: ["Formal university courses", "Apprenticeship within families and Sattras", "Online tutorials", "International workshops"],
+        // },
+        // {
+        //     question: "What historical period saw a significant flourishing of Assamese manuscript writing?",
+        //     options: ["Mauryan period", "Gupta period", "Ahom period", "Mughal period"],
+        // },
     ];
 
     const correctAnswers = [
@@ -190,9 +217,11 @@ export default function Questionnaire() {
                 <button
                     type="button"
                     onClick={handleSubmit}
-                    className="bg-red-900 hover:bg-red-800 text-white font-bold py-3 px-6 rounded-md w-full transition mt-4 cursor-pointer"
+                    disabled={isSubmitting}
+                    // className="bg-red-900 hover:bg-red-800 text-white font-bold py-3 px-6 rounded-md w-full transition mt-4 cursor-pointer"
+                    className={`bg-red-900 hover:bg-red-800 text-white font-bold py-3 px-6 rounded-md w-full transition mt-4 cursor-pointer ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                    Submit Questionnaire
+                    {isSubmitting ? "Submitting..." : "Submit Questionnaire"}
                 </button>
 
             </form>
