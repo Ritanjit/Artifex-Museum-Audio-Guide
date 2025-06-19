@@ -1,100 +1,45 @@
+// src\components\bulletin\LatestNewsHeadlines.tsx
 import React, { useState, useEffect } from 'react';
-import {
-    Clock,
-    ChevronRight,
-    TrendingUp,
-    Calendar,
-    Search,
-    Filter,
-    Eye,
-    ExternalLink,
-    BookOpen,
-    Star,
-    Timer,
-    Users
-} from 'lucide-react';
+import { Clock, ChevronRight, Calendar, Search, Filter, Eye, ExternalLink, BookOpen, Star, Timer, Users } from 'lucide-react';
+import { getAllNews } from '@/actions/news'; // Import API function
 
 interface NewsItem {
     id: string;
     headline: string;
-    date: Date;
-    category: 'discovery' | 'exhibition' | 'workshop' | 'cultural' | 'research';
-    priority: 'high' | 'medium' | 'low';
-    readTime: number;
-    views: number;
     excerpt: string;
+    category: 'discovery' | 'exhibition' | 'workshop' | 'cultural' | 'research';
     featured: boolean;
+    tags: string[];
+    date: Date;
+    lastUpdated: Date; // Replacing readTime
 }
 
 const LatestNewsBulletin: React.FC = () => {
-    const [newsItems] = useState<NewsItem[]>([
-        {
-            id: '1',
-            headline: 'Rare 15th Century Ahom Manuscript Discovered in Majuli',
-            date: new Date('2025-06-15'),
-            category: 'discovery',
-            priority: 'high',
-            readTime: 5,
-            views: 1247,
-            excerpt: 'Archaeologists have uncovered a pristine manuscript containing ancient Tai Ahom scripts and illustrations...',
-            featured: true
-        },
-        {
-            id: '2',
-            headline: 'Interactive Digital Archive Launch: Exploring Ahom Heritage',
-            date: new Date('2025-06-12'),
-            category: 'exhibition',
-            priority: 'high',
-            readTime: 3,
-            views: 892,
-            excerpt: 'Experience centuries of Ahom history through our new immersive digital platform...',
-            featured: true
-        },
-        {
-            id: '3',
-            headline: 'Traditional Calligraphy Workshop: Master the Art of Tai Ahom',
-            date: new Date('2025-06-10'),
-            category: 'workshop',
-            priority: 'medium',
-            readTime: 4,
-            views: 634,
-            excerpt: 'Learn from renowned calligraphy masters in this hands-on workshop series...',
-            featured: false
-        },
-        {
-            id: '4',
-            headline: 'Royal Seal Collection: New Acquisitions from Private Donors',
-            date: new Date('2025-06-08'),
-            category: 'cultural',
-            priority: 'medium',
-            readTime: 6,
-            views: 445,
-            excerpt: 'Three rare royal seals from the Ahom dynasty have been generously donated to our collection...',
-            featured: false
-        },
-        {
-            id: '5',
-            headline: 'Research Collaboration: Oxford University Partnership Announced',
-            date: new Date('2025-06-05'),
-            category: 'research',
-            priority: 'high',
-            readTime: 7,
-            views: 1156,
-            excerpt: 'A groundbreaking partnership will advance digital preservation of ancient manuscripts...',
-            featured: false
-        },
-        {
-            id: '6',
-            headline: 'Community Outreach: Mobile Museum Visits Rural Schools',
-            date: new Date('2025-06-03'),
-            category: 'cultural',
-            priority: 'low',
-            readTime: 3,
-            views: 298,
-            excerpt: 'Bringing Ahom heritage education directly to students across Assam...',
-            featured: false
-        }
-    ]);
+    const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Fetch news data from API
+    useEffect(() => {
+        const fetchNews = async () => {
+            try {
+                const data = await getAllNews();
+                const formattedData = data.map((item: any) => ({
+                    ...item,
+                    date: new Date(item.date),
+                    lastUpdated: new Date(item.updated_at)
+                }));
+                setNewsItems(formattedData);
+            } catch (err) {
+                setError('Failed to load news');
+                console.error(err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchNews();
+    }, []);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -109,14 +54,6 @@ const LatestNewsBulletin: React.FC = () => {
         { value: 'cultural', label: 'Cultural', color: 'bg-orange-100 dark:bg-orange-900/30' },
         { value: 'research', label: 'Research', color: 'bg-cyan-100 dark:bg-cyan-900/30' }
     ];
-
-    const getPriorityIcon = (priority: string) => {
-        switch (priority) {
-            case 'high': return <TrendingUp className="w-4 h-4 text-red-600 dark:text-red-400" />;
-            case 'medium': return <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />;
-            default: return <Timer className="w-4 h-4 text-gray-600 dark:text-gray-400" />;
-        }
-    };
 
     const getCategoryColor = (category: string) => {
         const cat = categories.find(c => c.value === category);
@@ -134,6 +71,16 @@ const LatestNewsBulletin: React.FC = () => {
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
 
+    const formatLastUpdated = (date: Date) => {
+        const now = new Date();
+        const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return 'today';
+        if (diffDays === 1) return 'yesterday';
+        if (diffDays <= 7) return `${diffDays} days ago`;
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    };
+
     // Filter news based on search and category
     useEffect(() => {
         let filtered = newsItems;
@@ -141,7 +88,10 @@ const LatestNewsBulletin: React.FC = () => {
         if (searchTerm) {
             filtered = filtered.filter(item =>
                 item.headline.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+                item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (item.tags && item.tags.some(tag =>
+                    tag.toLowerCase().includes(searchTerm.toLowerCase())
+                ))
             );
         }
 
@@ -166,6 +116,26 @@ const LatestNewsBulletin: React.FC = () => {
     const featuredNews = filteredNews.filter(item => item.featured);
     const regularNews = filteredNews.filter(item => !item.featured);
     const currentFeatured = featuredNews[currentNewsIndex];
+
+    // Before the return statement:
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7f1d1d] dark:border-amber-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">Loading latest news...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="w-full text-center py-12 text-red-600 dark:text-red-400">
+                {error}
+            </div>
+        );
+    }
 
     return (
         <div className="w-full max-w-screen mx-auto bg-white dark:bg-gray-900 overflow-hidden">
@@ -233,7 +203,7 @@ const LatestNewsBulletin: React.FC = () => {
                                             {categories.find(c => c.value === currentFeatured.category)?.label}
                                         </span>
                                         <div className="flex items-center gap-1">
-                                            {getPriorityIcon(currentFeatured.priority)}
+                                            {/* {getPriorityIcon(currentFeatured.priority)} */}
                                         </div>
                                         <span className="text-sm text-gray-600 dark:text-gray-400">
                                             {formatDate(currentFeatured.date)}
@@ -252,18 +222,16 @@ const LatestNewsBulletin: React.FC = () => {
                                         <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                                             <div className="flex items-center gap-1">
                                                 <Clock className="w-4 h-4" />
-                                                <span>{currentFeatured.readTime} min read</span>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <Eye className="w-4 h-4" />
-                                                <span>{currentFeatured.views.toLocaleString()} views</span>
+                                                <span>
+                                                    Updated {formatLastUpdated(currentFeatured.lastUpdated)}
+                                                </span>
                                             </div>
                                         </div>
 
-                                        <button className="flex items-center gap-2 px-4 py-2 bg-[#7f1d1d] dark:bg-amber-600 text-white rounded-lg hover:bg-[#991b1b] dark:hover:bg-amber-700 transition-colors">
+                                        {/* <button className="flex items-center gap-2 px-4 py-2 bg-[#7f1d1d] dark:bg-amber-600 text-white rounded-lg hover:bg-[#991b1b] dark:hover:bg-amber-700 transition-colors">
                                             <span>Read More</span>
                                             <ExternalLink className="w-4 h-4" />
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
                             </div>
@@ -276,8 +244,8 @@ const LatestNewsBulletin: React.FC = () => {
                                             key={index}
                                             onClick={() => setCurrentNewsIndex(index)}
                                             className={`w-2 h-2 rounded-full transition-colors ${index === currentNewsIndex
-                                                    ? 'bg-[#7f1d1d] dark:bg-amber-500'
-                                                    : 'bg-gray-300 dark:bg-gray-600'
+                                                ? 'bg-[#7f1d1d] dark:bg-amber-500'
+                                                : 'bg-gray-300 dark:bg-gray-600'
                                                 }`}
                                         />
                                     ))}
@@ -308,7 +276,7 @@ const LatestNewsBulletin: React.FC = () => {
                                             <span className={`px-2 py-1 rounded text-xs font-medium ${getCategoryColor(item.category)} text-gray-700 dark:text-gray-300`}>
                                                 {categories.find(c => c.value === item.category)?.label}
                                             </span>
-                                            {getPriorityIcon(item.priority)}
+                                            {/* {getPriorityIcon(item.priority)} */}
                                         </div>
                                         <span className="text-xs text-gray-500 dark:text-gray-400">
                                             {formatDate(item.date)}
@@ -327,11 +295,7 @@ const LatestNewsBulletin: React.FC = () => {
                                         <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                                             <div className="flex items-center gap-1">
                                                 <Clock className="w-3 h-3" />
-                                                <span>{item.readTime}m</span>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <Users className="w-3 h-3" />
-                                                <span>{item.views}</span>
+                                                <span>Updated {formatLastUpdated(item.lastUpdated)}</span>
                                             </div>
                                         </div>
 

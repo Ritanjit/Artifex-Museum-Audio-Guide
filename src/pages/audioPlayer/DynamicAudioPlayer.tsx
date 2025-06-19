@@ -1,7 +1,7 @@
 // src/pages/audioPlayer/DynamicAudioPlayer.tsx
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getArtifactById } from "@/actions/upload";
+import { getArtifactById } from "@/actions/artifact";
 import AudioPlayer from "./AudioPlayer";
 import ErrorBoundary from '@/components/errorBoundary/ErrorBoundary';
 

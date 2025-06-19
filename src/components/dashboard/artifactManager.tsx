@@ -1,7 +1,7 @@
 // src/components/dashboard/artifactManager.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { Edit2, Trash2, X, Save, Search, Filter, Info, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward } from "lucide-react";
-import { getAllArtifacts, updateArtifact, deleteArtifact } from "@/actions/upload";
+import { getAllArtifacts, updateArtifact, deleteArtifact } from "@/actions/artifact";
 
 interface Artifact {
     id: string;

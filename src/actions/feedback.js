@@ -35,3 +35,18 @@ export async function getAllFeedback() {
         throw error;
     }
 }
+
+export async function getFeedbackByDateRange(startDate, endDate) {
+    try {
+        const response = await Api.get("/artifex-feedback", {
+            filter: `created_at:gte:${startDate},created_at:lte:${endDate}`,
+            fields: "id,rating,created_at",
+            sort: "created_at",
+            page: "1,1000"
+        });
+        return response.result || [];
+    } catch (error) {
+        console.error("Error fetching feedback:", error);
+        throw error;
+    }
+}

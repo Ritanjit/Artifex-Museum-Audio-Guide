@@ -5,7 +5,7 @@ import {
     CloudUpload, Loader2, SkipBack, SkipForward, Music, AlertCircle
 } from "lucide-react";
 import UploadCollectionsImage from "./uploadCollectionsImage";
-import { saveArtifact, updateArtifact } from "@/actions/upload";
+import { saveArtifact, updateArtifact } from "@/actions/artifact";
 import { uploadAudio } from "@/apis/audio";
 
 

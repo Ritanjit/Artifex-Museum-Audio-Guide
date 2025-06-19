@@ -1,46 +1,39 @@
+// src/components/bulletin/homeNews.tsx
 import React, { useState, useEffect } from 'react';
 import {
     Calendar,
     Clock,
     MapPin,
-    Users,
-    Star,
-    TrendingUp,
     ChevronRight,
     ArrowRight,
-    Eye,
-    Timer,
+    ExternalLink,
     BookOpen,
     Sparkles,
     Play,
-    Pause,
-    ExternalLink,
-    Heart
+    Pause
 } from 'lucide-react';
+import { getAllNews } from '@/actions/news';
+import { getAllEvents } from '@/actions/events';
 
 interface NewsItem {
     id: string;
     headline: string;
-    date: Date;
+    date: string | Date;
     category: 'discovery' | 'exhibition' | 'workshop' | 'cultural' | 'research';
-    priority: 'high' | 'medium' | 'low';
-    readTime: number;
-    views: number;
     excerpt: string;
     featured: boolean;
+    updated_at: string | Date;
+    tags?: string[]; // Add tags if needed
 }
 
 interface Event {
     id: string;
     title: string;
     description: string;
-    date: Date;
+    date: string | Date;
     time: string;
     location: string;
     category: 'exhibition' | 'workshop' | 'lecture' | 'cultural' | 'special';
-    capacity: number;
-    registered: number;
-    price: number;
     featured: boolean;
 }
 
@@ -49,87 +42,43 @@ const HomeNewsEventsHighlights: React.FC = () => {
     const [currentEventIndex, setCurrentEventIndex] = useState(0);
     const [isNewsPlaying, setIsNewsPlaying] = useState(true);
     const [isEventsPlaying, setIsEventsPlaying] = useState(true);
-    const [favorites, setFavorites] = useState<Set<string>>(new Set());
+    const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+    const [events, setEvents] = useState<Event[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Sample news data
-    const newsItems: NewsItem[] = [
-        {
-            id: '1',
-            headline: 'Rare 15th Century Ahom Manuscript Discovered in Majuli',
-            date: new Date('2025-06-15'),
-            category: 'discovery',
-            priority: 'high',
-            readTime: 5,
-            views: 1247,
-            excerpt: 'Archaeologists have uncovered a pristine manuscript containing ancient Tai Ahom scripts and royal genealogies...',
-            featured: true
-        },
-        {
-            id: '2',
-            headline: 'Interactive Digital Archive Launch: Exploring Ahom Heritage',
-            date: new Date('2025-06-12'),
-            category: 'exhibition',
-            priority: 'high',
-            readTime: 3,
-            views: 892,
-            excerpt: 'Experience centuries of Ahom history through our new immersive digital platform with 3D reconstructions...',
-            featured: true
-        },
-        {
-            id: '3',
-            headline: 'Royal Seal Collection: New Acquisitions from Private Donors',
-            date: new Date('2025-06-08'),
-            category: 'cultural',
-            priority: 'medium',
-            readTime: 4,
-            views: 634,
-            excerpt: 'Three rare royal seals from the Ahom dynasty have been generously donated to expand our collection...',
-            featured: true
-        }
-    ];
+    // Fetch news and events from API
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [newsData, eventsData] = await Promise.all([
+                    getAllNews(),
+                    getAllEvents()
+                ]);
 
-    // Sample events data
-    const events: Event[] = [
-        {
-            id: '1',
-            title: 'Ancient Ahom Manuscripts Exhibition',
-            description: 'Explore rare 600-year-old manuscripts showcasing the rich heritage of the Ahom dynasty.',
-            date: new Date(2025, 6, 15),
-            time: '10:00 AM - 6:00 PM',
-            location: 'Main Gallery',
-            category: 'exhibition',
-            capacity: 200,
-            registered: 156,
-            price: 0,
-            featured: true
-        },
-        {
-            id: '2',
-            title: 'Tai Ahom Script Workshop',
-            description: 'Learn the ancient art of writing in Tai Ahom script with expert guidance.',
-            date: new Date(2025, 6, 18),
-            time: '2:00 PM - 5:00 PM',
-            location: 'Workshop Hall',
-            category: 'workshop',
-            capacity: 30,
-            registered: 24,
-            price: 500,
-            featured: true
-        },
-        {
-            id: '3',
-            title: 'Traditional Assamese Cultural Night',
-            description: 'Experience traditional music, dance, and storytelling from Assam.',
-            date: new Date(2025, 6, 25),
-            time: '7:00 PM - 9:30 PM',
-            location: 'Courtyard',
-            category: 'cultural',
-            capacity: 300,
-            registered: 267,
-            price: 300,
-            featured: true
-        }
-    ];
+                // Process news data - remove the featured filter
+                const formattedNews = (newsData || []).map((item: any) => ({
+                    ...item,
+                    date: item.date ? new Date(item.date) : new Date(),
+                    updated_at: item.updated_at ? new Date(item.updated_at) : new Date()
+                }));
+
+                // Process events data - keep featured filter for events
+                const formattedEvents = (eventsData || []).map((item: any) => ({
+                    ...item,
+                    date: item.date ? new Date(item.date) : new Date()
+                })).filter((item: any) => item.featured);
+
+                setNewsItems(formattedNews);
+                setEvents(formattedEvents);
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     // Auto-rotate news
     useEffect(() => {
@@ -151,7 +100,12 @@ const HomeNewsEventsHighlights: React.FC = () => {
         }
     }, [isEventsPlaying, events.length]);
 
-    const formatDate = (date: Date) => {
+    const formatDate = (dateInput: string | Date | undefined) => {
+        if (!dateInput) return '';
+        const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+
+        if (isNaN(date.getTime())) return '';
+
         const now = new Date();
         const diffTime = Math.abs(now.getTime() - date.getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -160,14 +114,6 @@ const HomeNewsEventsHighlights: React.FC = () => {
         if (diffDays === 2) return 'Yesterday';
         if (diffDays <= 7) return `${diffDays - 1} days ago`;
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    };
-
-    const getPriorityColor = (priority: string) => {
-        switch (priority) {
-            case 'high': return 'text-red-600 dark:text-red-400';
-            case 'medium': return 'text-amber-600 dark:text-amber-400';
-            default: return 'text-gray-600 dark:text-gray-400';
-        }
     };
 
     const getCategoryColor = (category: string) => {
@@ -183,18 +129,37 @@ const HomeNewsEventsHighlights: React.FC = () => {
         }
     };
 
-    const toggleFavorite = (id: string) => {
-        const newFavorites = new Set(favorites);
-        if (newFavorites.has(id)) {
-            newFavorites.delete(id);
-        } else {
-            newFavorites.add(id);
-        }
-        setFavorites(newFavorites);
-    };
+    if (isLoading) {
+        return (
+            <div className="w-full bg-gradient-to-br from-stone-50 via-gray-50 to-stone-100 dark:from-gray-900 dark:via-black dark:to-gray-900 py-16">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7f1d1d] dark:border-amber-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">Loading highlights...</p>
+                </div>
+            </div>
+        );
+    }
 
-    const currentNews = newsItems[currentNewsIndex];
-    const currentEvent = events[currentEventIndex];
+    if (!newsItems.length && !events.length) {
+        return (
+            <div className="w-full bg-gradient-to-br from-stone-50 via-gray-50 to-stone-100 dark:from-gray-900 dark:via-black dark:to-gray-900 py-16">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <div className="p-2 bg-gradient-to-r from-[#7f1d1d] to-[#991b1b] dark:from-amber-600 dark:to-amber-700 rounded-lg w-12 h-12 mx-auto mb-4">
+                        <Sparkles className="w-8 h-8 text-white mx-auto" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                        No highlights available
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-300">
+                        Check back later for the latest news and events
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    const currentNews = newsItems[currentNewsIndex] || null;
+    const currentEvent = events[currentEventIndex] || null;
 
     return (
         <div className="w-full bg-gradient-to-br from-stone-50 via-gray-50 to-stone-100 dark:from-gray-900 dark:via-black dark:to-gray-900 py-16">
@@ -216,242 +181,191 @@ const HomeNewsEventsHighlights: React.FC = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Featured News Section */}
-                    <div className="relative">
-                        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border-2 border-[#7f1d1d]/20 dark:border-amber-500/20 overflow-hidden shadow-xl">
-                            {/* News Header */}
-                            <div className="bg-gradient-to-r from-[#7f1d1d] to-[#991b1b] dark:from-amber-600 dark:to-amber-700 px-6 py-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <BookOpen className="w-5 h-5 text-white" />
-                                        <h3 className="text-lg font-semibold text-white">Breaking News</h3>
-                                        <div className="flex items-center gap-1">
-                                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                            <span className="text-xs text-white/80">Live</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => setIsNewsPlaying(!isNewsPlaying)}
-                                            className="p-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-                                        >
-                                            {isNewsPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white" />}
-                                        </button>
-                                        <span className="text-xs text-white/80">
-                                            {currentNewsIndex + 1}/{newsItems.length}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* News Content */}
-                            <div className="p-6">
-                                <div className="mb-4">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(currentNews.category)}`}>
-                                            {currentNews.category}
-                                        </span>
-                                        <TrendingUp className={`w-4 h-4 ${getPriorityColor(currentNews.priority)}`} />
-                                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                                            {formatDate(currentNews.date)}
-                                        </span>
-                                    </div>
-
-                                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
-                                        {currentNews.headline}
-                                    </h4>
-
-                                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                                        {currentNews.excerpt}
-                                    </p>
-
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                                            <div className="flex items-center gap-1">
-                                                <Clock className="w-4 h-4" />
-                                                <span>{currentNews.readTime} min</span>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <Eye className="w-4 h-4" />
-                                                <span>{currentNews.views}</span>
-                                            </div>
-                                        </div>
-
-                                        <button className="flex items-center gap-2 px-4 py-2 bg-[#7f1d1d] dark:bg-amber-600 text-white rounded-lg hover:bg-[#991b1b] dark:hover:bg-amber-700 transition-colors text-sm">
-                                            Read More
-                                            <ExternalLink className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* News Navigation Dots */}
-                                <div className="flex justify-center gap-2 mt-4">
-                                    {newsItems.map((_, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => setCurrentNewsIndex(index)}
-                                            className={`w-2 h-2 rounded-full transition-colors ${
-                                                index === currentNewsIndex
-                                                    ? 'bg-[#7f1d1d] dark:bg-amber-500'
-                                                    : 'bg-gray-300 dark:bg-gray-600'
-                                            }`}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* View All News Button */}
-                            <div className="px-6 pb-6">
-                                <button className="w-full flex items-center justify-center gap-2 py-3 border-2 border-[#7f1d1d] dark:border-amber-500 text-[#7f1d1d] dark:text-amber-500 rounded-lg hover:bg-[#7f1d1d] hover:text-white dark:hover:bg-amber-500 dark:hover:text-white transition-colors">
-                                    View All News
-                                    <ArrowRight className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Featured Events Section */}
-                    <div className="relative">
-                        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border-2 border-[#7f1d1d]/20 dark:border-amber-500/20 overflow-hidden shadow-xl">
-                            {/* Events Header */}
-                            <div className="bg-gradient-to-r from-[#7f1d1d] to-[#991b1b] dark:from-amber-600 dark:to-amber-700 px-6 py-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <Calendar className="w-5 h-5 text-white" />
-                                        <h3 className="text-lg font-semibold text-white">Upcoming Events</h3>
-                                        <Star className="w-4 h-4 text-yellow-300 fill-current" />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => setIsEventsPlaying(!isEventsPlaying)}
-                                            className="p-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-                                        >
-                                            {isEventsPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white" />}
-                                        </button>
-                                        <span className="text-xs text-white/80">
-                                            {currentEventIndex + 1}/{events.length}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Event Content */}
-                            <div className="p-6">
-                                <div className="mb-4">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(currentEvent.category)}`}>
-                                            {currentEvent.category}
-                                        </span>
-                                        <button
-                                            onClick={() => toggleFavorite(currentEvent.id)}
-                                            className="text-gray-400 hover:text-red-500 transition-colors"
-                                        >
-                                            <Heart className={`w-5 h-5 ${favorites.has(currentEvent.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                                        </button>
-                                    </div>
-
-                                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
-                                        {currentEvent.title}
-                                    </h4>
-
-                                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                                        {currentEvent.description}
-                                    </p>
-
-                                    <div className="space-y-2 mb-4">
-                                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                            <Calendar className="w-4 h-4 text-[#7f1d1d] dark:text-amber-500" />
-                                            <span>{currentEvent.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                            <Clock className="w-4 h-4 text-[#7f1d1d] dark:text-amber-500" />
-                                            <span>{currentEvent.time}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                            <MapPin className="w-4 h-4 text-[#7f1d1d] dark:text-amber-500" />
-                                            <span>{currentEvent.location}</span>
-                                        </div>
-                                    </div>
-
+                    {newsItems.length > 0 && (
+                        <div className="relative h-[400px]">
+                            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border-2 border-[#7f1d1d]/20 dark:border-amber-500/20 overflow-hidden shadow-xl h-full flex flex-col">
+                                {/* News Header */}
+                                <div className="bg-gradient-to-r from-[#7f1d1d] to-[#991b1b] dark:from-amber-600 dark:to-amber-700 px-6 py-4">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex items-center gap-1 text-sm">
-                                                <Users className="w-4 h-4 text-gray-500" />
-                                                <span className="text-gray-600 dark:text-gray-300">
-                                                    {currentEvent.registered}/{currentEvent.capacity}
-                                                </span>
-                                            </div>
-                                            <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1">
-                                                <div
-                                                    className="bg-[#7f1d1d] dark:bg-amber-500 h-1 rounded-full"
-                                                    style={{ width: `${(currentEvent.registered / currentEvent.capacity) * 100}%` }}
-                                                />
+                                            <BookOpen className="w-5 h-5 text-white" />
+                                            <h3 className="text-lg font-semibold text-white">Breaking News</h3>
+                                            <div className="flex items-center gap-1">
+                                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                                <span className="text-xs text-white/80">Live</span>
                                             </div>
                                         </div>
-
-                                        <span className="text-lg font-bold text-[#7f1d1d] dark:text-amber-400">
-                                            {currentEvent.price > 0 ? `₹${currentEvent.price}` : 'FREE'}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setIsNewsPlaying(!isNewsPlaying)}
+                                                className="p-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                                            >
+                                                {isNewsPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white" />}
+                                            </button>
+                                            <span className="text-xs text-white/80">
+                                                {currentNewsIndex + 1}/{newsItems.length}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Event Navigation Dots */}
-                                <div className="flex justify-center gap-2 mt-4">
-                                    {events.map((_, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => setCurrentEventIndex(index)}
-                                            className={`w-2 h-2 rounded-full transition-colors ${
-                                                index === currentEventIndex
-                                                    ? 'bg-[#7f1d1d] dark:bg-amber-500'
-                                                    : 'bg-gray-300 dark:bg-gray-600'
-                                            }`}
-                                        />
-                                    ))}
+                                {/* News Content */}
+                                <div className="p-6 flex-grow overflow-y-auto">
+                                    {currentNews && (
+                                        <>
+                                            <div className="mb-4">
+                                                <div className="flex items-center gap-2 mb-3 min-h-0 overflow-y-auto">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(currentNews.category)}`}>
+                                                        {currentNews.category}
+                                                    </span>
+                                                    {currentNews.featured && (
+                                                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+                                                            Featured
+                                                        </span>
+                                                    )}
+                                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                        {formatDate(currentNews.date)}
+                                                    </span>
+                                                </div>
+
+                                                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+                                                    {currentNews.headline}
+                                                </h4>
+
+                                                <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                                                    {currentNews.excerpt}
+                                                </p>
+
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                                                        <div className="flex items-center gap-1">
+                                                            <Clock className="w-4 h-4" />
+                                                            <span>Updated {formatDate(currentNews.updated_at)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* News Navigation Dots */}
+                                            <div className="flex justify-center gap-2 mt-4">
+                                                {newsItems.map((_, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => setCurrentNewsIndex(index)}
+                                                        className={`w-2 h-2 rounded-full transition-colors ${index === currentNewsIndex
+                                                            ? 'bg-[#7f1d1d] dark:bg-amber-500'
+                                                            : 'bg-gray-300 dark:bg-gray-600'
+                                                            }`}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* View All News Button */}
+                                <div className="px-6 pb-6">
+                                    <button className="w-full flex items-center justify-center gap-2 py-3 border-2 border-[#7f1d1d] dark:border-amber-500 text-[#7f1d1d] dark:text-amber-500 rounded-lg hover:bg-[#7f1d1d] hover:text-white dark:hover:bg-amber-500 dark:hover:text-white transition-colors">
+                                        View All News
+                                        <ExternalLink className="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
+                        </div>
+                    )}
 
-                            {/* Register & View All Events Buttons */}
-                            <div className="px-6 pb-6 space-y-3">
-                                <button className="w-full py-3 bg-[#7f1d1d] dark:bg-amber-600 text-white rounded-lg hover:bg-[#991b1b] dark:hover:bg-amber-700 transition-colors font-medium">
-                                    Register Now
-                                </button>
-                                <button className="w-full flex items-center justify-center gap-2 py-3 border-2 border-[#7f1d1d] dark:border-amber-500 text-[#7f1d1d] dark:text-amber-500 rounded-lg hover:bg-[#7f1d1d] hover:text-white dark:hover:bg-amber-500 dark:hover:text-white transition-colors">
-                                    View All Events
-                                    <ArrowRight className="w-4 h-4" />
-                                </button>
+                    {/* Featured Events Section */}
+                    {events.length > 0 && (
+                        <div className="relative h-[400px]">
+                            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border-2 border-[#7f1d1d]/20 dark:border-amber-500/20 overflow-hidden shadow-xl h-full flex flex-col">
+                                {/* Events Header */}
+                                <div className="bg-gradient-to-r from-[#7f1d1d] to-[#991b1b] dark:from-amber-600 dark:to-amber-700 px-6 py-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <Calendar className="w-5 h-5 text-white" />
+                                            <h3 className="text-lg font-semibold text-white">Upcoming Events</h3>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setIsEventsPlaying(!isEventsPlaying)}
+                                                className="p-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                                            >
+                                                {isEventsPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white" />}
+                                            </button>
+                                            <span className="text-xs text-white/80">
+                                                {currentEventIndex + 1}/{events.length}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Event Content */}
+                                <div className="p-6 flex-grow overflow-y-auto">
+                                    {currentEvent && (
+                                        <>
+                                            <div className="mb-4">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(currentEvent.category)}`}>
+                                                        {currentEvent.category}
+                                                    </span>
+                                                </div>
+
+                                                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+                                                    {currentEvent.title}
+                                                </h4>
+
+                                                <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                                                    {currentEvent.description}
+                                                </p>
+
+                                                <div className="mb-4 flex items-center gap-5">
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                                        <Calendar className="w-4 h-4 text-[#7f1d1d] dark:text-amber-500" />
+                                                        <span>
+                                                            {currentEvent.date instanceof Date
+                                                                ? currentEvent.date.toLocaleDateString('en-US', {
+                                                                    weekday: 'long',
+                                                                    month: 'long',
+                                                                    day: 'numeric'
+                                                                })
+                                                                : formatDate(currentEvent.date)}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                                        <Clock className="w-4 h-4 text-[#7f1d1d] dark:text-amber-500" />
+                                                        <span>{currentEvent.time}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Event Navigation Dots */}
+                                            <div className="flex justify-center gap-2 mt-4">
+                                                {events.map((_, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => setCurrentEventIndex(index)}
+                                                        className={`w-2 h-2 rounded-full transition-colors ${index === currentEventIndex
+                                                            ? 'bg-[#7f1d1d] dark:bg-amber-500'
+                                                            : 'bg-gray-300 dark:bg-gray-600'
+                                                            }`}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Register & View All Events Buttons */}
+                                <div className="px-6 pb-6 space-y-3">
+                                    <button className="w-full flex items-center justify-center gap-2 py-3 border-2 border-[#7f1d1d] dark:border-amber-500 text-[#7f1d1d] dark:text-amber-500 rounded-lg hover:bg-[#7f1d1d] hover:text-white dark:hover:bg-amber-500 dark:hover:text-white transition-colors">
+                                        View All Events
+                                        <ExternalLink className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
-
-                {/* // Quick Stats
-                <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 text-center">
-                        <div className="text-2xl font-bold text-[#7f1d1d] dark:text-amber-500 mb-1">
-                            {newsItems.filter(n => n.priority === 'high').length}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-300">Breaking News</div>
-                    </div>
-                    <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 text-center">
-                        <div className="text-2xl font-bold text-[#7f1d1d] dark:text-amber-500 mb-1">
-                            {events.filter(e => e.featured).length}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-300">Featured Events</div>
-                    </div>
-                    <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 text-center">
-                        <div className="text-2xl font-bold text-[#7f1d1d] dark:text-amber-500 mb-1">
-                            {events.reduce((sum, e) => sum + e.registered, 0)}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-300">Registrations</div>
-                    </div>
-                    <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 text-center">
-                        <div className="text-2xl font-bold text-[#7f1d1d] dark:text-amber-500 mb-1">
-                            {newsItems.reduce((sum, n) => sum + n.views, 0)}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-300">Total Views</div>
-                    </div>
-                </div> */}
-                
             </div>
         </div>
     );

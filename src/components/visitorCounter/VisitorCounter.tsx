@@ -13,11 +13,11 @@ const VisitorCounter = () => {
     }
 
     return (
-        <div className="fixed bottom-4 left-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg text-sm font-medium text-gray-700 dark:text-gray-200 z-50 flex items-center">
+        <div className="fixed bottom-4 left-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg text-sm font-medium text-gray-700 dark:text-gray-200 z-50 flex items-center hidden sm:block">
             <span className="mr-2">👣</span>
             <span>Visitors: </span>
             {visitorCount !== null ? (
-                <span className="font-mono ml-1">
+                <span className="ml-1">
                     {visitorCount.toLocaleString()}
                 </span>
             ) : (

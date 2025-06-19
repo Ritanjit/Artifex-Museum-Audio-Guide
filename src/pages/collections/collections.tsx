@@ -3,7 +3,7 @@ import CollectionsBanner from "@/components/collections/collectionsBanner";
 import FloatingSearchBar from "@/components/searchbar";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getAllArtifacts } from "@/actions/upload";
+import { getAllArtifacts } from "@/actions/artifact";
 
 // Define the structure of an artifact item
 interface ArtifactItem {

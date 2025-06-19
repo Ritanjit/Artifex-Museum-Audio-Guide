@@ -1,21 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import {
-    Calendar,
-    ChevronLeft,
-    ChevronRight,
-    MapPin,
-    Clock,
-    Users,
-    Star,
-    Filter,
-    Search,
-    Grid,
-    List,
-    Eye,
-    Share2,
-    Heart,
-    X
-} from 'lucide-react';
+// src\components\bulletin\CalenderEvents.tsx
+import React, { useState, useEffect, useRef } from 'react';
+import { Calendar, ChevronLeft, ChevronRight, MapPin, Clock, Filter, Search, Grid, List, Eye, Share2, X, Star, CheckCircle, AlertCircle } from 'lucide-react';
+import { WaypointsIcon, WaypointsIconHandle } from '@/components/ui/share';
+import { getAllEvents } from '@/actions/events';
 
 interface Event {
     id: string;
@@ -25,96 +12,91 @@ interface Event {
     time: string;
     location: string;
     category: 'exhibition' | 'workshop' | 'lecture' | 'cultural' | 'special';
-    capacity: number;
-    registered: number;
-    price: number;
     featured: boolean;
-    image?: string;
 }
 
-interface EventsCalendarProps {
-    events?: Event[];
-}
-
-const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) => {
+const EventsCalendar: React.FC = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-    const [favorites, setFavorites] = useState<Set<string>>(new Set());
+    const waypointRef = useRef<WaypointsIconHandle>(null);
 
-    // Sample events data
-    const defaultEvents: Event[] = [
-        {
-            id: '1',
-            title: 'Ancient Ahom Manuscripts Exhibition',
-            description: 'Explore rare 600-year-old manuscripts showcasing the rich heritage of the Ahom dynasty.',
-            date: new Date(2025, 6, 15),
-            time: '10:00 AM - 6:00 PM',
-            location: 'Main Gallery',
-            category: 'exhibition',
-            capacity: 200,
-            registered: 156,
-            price: 0,
-            featured: true
-        },
-        {
-            id: '2',
-            title: 'Tai Ahom Script Workshop',
-            description: 'Learn the ancient art of writing in Tai Ahom script with expert guidance.',
-            date: new Date(2025, 6, 18),
-            time: '2:00 PM - 5:00 PM',
-            location: 'Workshop Hall',
-            category: 'workshop',
-            capacity: 30,
-            registered: 24,
-            price: 500,
-            featured: false
-        },
-        {
-            id: '3',
-            title: 'Royal Chronicles: Ahom Kings Lecture',
-            description: 'Distinguished historian Dr. Sarah Johnson discusses the legacy of Ahom rulers.',
-            date: new Date(2025, 6, 22),
-            time: '4:00 PM - 6:00 PM',
-            location: 'Auditorium',
-            category: 'lecture',
-            capacity: 150,
-            registered: 89,
-            price: 200,
-            featured: true
-        },
-        {
-            id: '4',
-            title: 'Traditional Assamese Cultural Night',
-            description: 'Experience traditional music, dance, and storytelling from Assam.',
-            date: new Date(2025, 6, 25),
-            time: '7:00 PM - 9:30 PM',
-            location: 'Courtyard',
-            category: 'cultural',
-            capacity: 300,
-            registered: 267,
-            price: 300,
-            featured: true
-        },
-        {
-            id: '5',
-            title: 'Manuscript Preservation Techniques',
-            description: 'Learn about modern techniques used to preserve ancient manuscripts.',
-            date: new Date(2025, 6, 28),
-            time: '11:00 AM - 1:00 PM',
-            location: 'Conservation Lab',
-            category: 'workshop',
-            capacity: 15,
-            registered: 12,
-            price: 750,
-            featured: false
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+    // Add this function to handle sharing
+    const handleShare = async () => {
+        try {
+            const url = window.location.href;
+
+            // Check if Web Share API is available (mobile devices)
+            if (navigator.share) {
+                await navigator.share({
+                    title: selectedEvent?.title || 'Museum Event',
+                    text: selectedEvent?.description || 'Check out this museum event',
+                    url: url,
+                });
+            } else {
+                // Fallback for desktop browsers
+                await navigator.clipboard.writeText(url);
+                setToast({ message: 'Event link copied to clipboard!', type: 'success' });
+            }
+        } catch (error) {
+            console.error('Error sharing:', error);
+            setToast({ message: 'Failed to share event', type: 'error' });
         }
-    ];
+    };
 
-    const events = propEvents || defaultEvents;
+    // Initialize viewMode state with a function to check screen size
+    const [viewMode, setViewMode] = useState<'calendar' | 'list'>(() => {
+        // Check if window is defined (for SSR compatibility)
+        if (typeof window !== 'undefined') {
+            // Check if screen is mobile (less than 1024px)
+            return window.matchMedia('(max-width: 1023px)').matches ? 'list' : 'calendar';
+        }
+        // Default to 'calendar' if window is not available (SSR)
+        return 'calendar';
+    });
+
+    // Add effect to handle screen size changes
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.matchMedia('(max-width: 1023px)').matches) {
+                setViewMode('list');
+            } else {
+                setViewMode('calendar');
+            }
+        };
+
+        // Set up event listener
+        window.addEventListener('resize', handleResize);
+
+        // Clean up
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const [events, setEvents] = useState<Event[]>([]);
+
+    // Fetch events on component mount
+    useEffect(() => {
+        const fetchEvents = async () => {
+            try {
+                const eventsData = await getAllEvents();
+                const formattedEvents = eventsData.map((event: any) => ({
+                    ...event,
+                    date: new Date(event.date)
+                }));
+                setEvents(formattedEvents);
+            } catch (error) {
+                console.error('Failed to fetch events:', error);
+            }
+        };
+
+        fetchEvents();
+    }, []);
+
+    // const events = propEvents || defaultEvents;
 
     const categories = [
         { id: 'all', name: 'All Events', color: 'bg-gray-100 text-gray-800' },
@@ -169,14 +151,14 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
 
     const calendar = generateCalendar();
 
-    const toggleFavorite = (eventId: string) => {
-        const newFavorites = new Set(favorites);
-        if (newFavorites.has(eventId)) {
-            newFavorites.delete(eventId);
+    const handleDateClick = (date: Date) => {
+        if (selectedDate && date.toDateString() === selectedDate.toDateString()) {
+            // Clicking the same date again will clear the selection
+            setSelectedDate(null);
         } else {
-            newFavorites.add(eventId);
+            // Clicking a new date will select it
+            setSelectedDate(date);
         }
-        setFavorites(newFavorites);
     };
 
     const getCategoryColor = (category: string) => {
@@ -193,9 +175,29 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
 
     return (
         <div className="w-full max-w-8xl mx-auto bg-white dark:bg-gray-900 overflow-hidden">
+
+            {toast && (
+                <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg max-w-sm transition-all transform ${toast.type === 'success'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-red-600 text-white'
+                    }`}>
+                    <div className="flex items-center gap-2">
+                        {toast.type === 'success' ? (
+                            <CheckCircle size={20} />
+                        ) : (
+                            <AlertCircle size={20} />
+                        )}
+                        <span>{toast.message}</span>
+                        <button onClick={() => setToast(null)}>
+                            <X size={16} />
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8 sm:px-30 pt-32
-            bg-gradient-to-r from-[#7f1d1d] to-[#991b1b] dark:from-amber-600 dark:to-amber-700 p-6">
+    bg-gradient-to-r from-[#7f1d1d] to-[#991b1b] dark:from-amber-600 dark:to-amber-700 p-6">
                 <div>
                     <h2 className="text-3xl font-bold text-white dark:text-amber-400 mb-2">
                         Museum Events & Calendar
@@ -205,24 +207,39 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 order-first lg:order-none">
                     <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                        {/* Show List button first on mobile */}
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${viewMode === 'list'
+                                ? 'bg-[#7f1d1d] text-white dark:bg-amber-600'
+                                : 'text-gray-600 dark:text-gray-300 hover:text-[#7f1d1d] dark:hover:text-amber-400'
+                                } lg:hidden`}
+                        >
+                            <List size={16} />
+                            List
+                        </button>
+
+                        {/* Calendar button - shown on all screens */}
                         <button
                             onClick={() => setViewMode('calendar')}
                             className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${viewMode === 'calendar'
-                                    ? 'bg-[#7f1d1d] text-white dark:bg-amber-600'
-                                    : 'text-gray-600 dark:text-gray-300 hover:text-[#7f1d1d] dark:hover:text-amber-400'
+                                ? 'bg-[#7f1d1d] text-white dark:bg-amber-600'
+                                : 'text-gray-600 dark:text-gray-300 hover:text-[#7f1d1d] dark:hover:text-amber-400'
                                 }`}
                         >
                             <Grid size={16} />
                             Calendar
                         </button>
+
+                        {/* List button - hidden on mobile, shown on larger screens */}
                         <button
                             onClick={() => setViewMode('list')}
                             className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${viewMode === 'list'
-                                    ? 'bg-[#7f1d1d] text-white dark:bg-amber-600'
-                                    : 'text-gray-600 dark:text-gray-300 hover:text-[#7f1d1d] dark:hover:text-amber-400'
-                                }`}
+                                ? 'bg-[#7f1d1d] text-white dark:bg-amber-600'
+                                : 'text-gray-600 dark:text-gray-300 hover:text-[#7f1d1d] dark:hover:text-amber-400'
+                                } hidden lg:flex`}
                         >
                             <List size={16} />
                             List
@@ -232,7 +249,7 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
             </div>
 
             {/* Search and Filter */}
-            <div className="flex flex-col lg:flex-row gap-4 mb-8 sm:px-30">
+            <div className="flex flex-col lg:flex-row gap-4 mb-8 sm:px-30 px-5">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                     <input
@@ -250,8 +267,8 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
                             key={category.id}
                             onClick={() => setSelectedCategory(category.id)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === category.id
-                                    ? 'bg-[#7f1d1d] text-white dark:bg-amber-600'
-                                    : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                ? 'bg-[#7f1d1d] text-white dark:bg-amber-600'
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                 }`}
                         >
                             {category.name}
@@ -261,103 +278,114 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
             </div>
 
             {viewMode === 'calendar' ? (
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 sm:px-30 mb-5">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-5 sm:px-30 mb-10">
                     {/* Calendar */}
-                    <div className="xl:col-span-2">
-                        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
-                            {/* Calendar Header */}
-                            <div className="flex justify-between items-center mb-6">
-                                <button
-                                    onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-                                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                                >
-                                    <ChevronLeft size={20} />
-                                </button>
-                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                                    {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                                </h3>
-                                <button
-                                    onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-                                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                                >
-                                    <ChevronRight size={20} />
-                                </button>
-                            </div>
+                    <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg">
+                        <div className="flex justify-between items-center mb-6">
+                            <button
+                                onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                                {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                            </h3>
+                            <button
+                                onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                <ChevronRight size={20} />
+                            </button>
+                        </div>
 
-                            {/* Calendar Grid */}
-                            <div className="grid grid-cols-7 gap-1">
-                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                    <div key={day} className="text-center text-sm font-medium text-gray-500 dark:text-gray-400 py-2">
-                                        {day}
-                                    </div>
-                                ))}
-                            </div>
+                        <div className="grid grid-cols-7 gap-1 mb-2">
+                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                <div key={day} className="text-center text-sm font-medium text-gray-500 dark:text-gray-400 py-2">
+                                    {day}
+                                </div>
+                            ))}
+                        </div>
 
-                            <div className="grid grid-cols-7 gap-1">
-                                {calendar.flat().map((date, index) => {
-                                    const dayEvents = getEventsForDate(date);
-                                    const isCurrentMonth = date.getMonth() === currentDate.getMonth();
-                                    const isToday = date.toDateString() === new Date().toDateString();
-                                    const isSelected = selectedDate?.toDateString() === date.toDateString();
+                        <div className="grid grid-cols-7 gap-1">
+                            {calendar.flat().map((date, index) => {
+                                const dayEvents = getEventsForDate(date);
+                                const isCurrentMonth = date.getMonth() === currentDate.getMonth();
+                                const isToday = date.toDateString() === new Date().toDateString();
+                                const isSelected = selectedDate?.toDateString() === date.toDateString();
 
-                                    return (
-                                        <div
-                                            key={index}
-                                            onClick={() => setSelectedDate(date)}
-                                            className={`relative p-2 h-16 border rounded-lg cursor-pointer transition-all hover:shadow-md ${isCurrentMonth ? 'bg-white dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800'
-                                                } ${isSelected ? 'ring-2 ring-[#7f1d1d] dark:ring-amber-500' : ''} ${!isCurrentMonth ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'
-                                                }`}
-                                        >
-                                            <div className={`text-sm font-medium ${isToday ? 'text-[#7f1d1d] dark:text-amber-400' : ''}`}>
-                                                {date.getDate()}
-                                            </div>
-                                            {dayEvents.length > 0 && (
-                                                <div className="absolute bottom-1 left-1 right-1">
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {dayEvents.slice(0, 2).map((event, i) => (
-                                                            <div
-                                                                key={i}
-                                                                className={`w-2 h-2 rounded-full ${event.featured ? 'bg-[#7f1d1d] dark:bg-amber-500' : 'bg-gray-400'
-                                                                    }`}
-                                                            />
-                                                        ))}
-                                                        {dayEvents.length > 2 && (
-                                                            <div className="text-xs text-gray-500">+{dayEvents.length - 2}</div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
+                                return (
+                                    <div
+                                        key={index}
+                                        onClick={() => handleDateClick(date)}
+                                        className={`relative min-h-24 p-2 border rounded-xl cursor-pointer transition-all hover:shadow-md ${isCurrentMonth ? 'bg-white dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800'
+                                            } ${isSelected ? 'ring-2 ring-[#7f1d1d] dark:ring-amber-500' : ''
+                                            } ${!isCurrentMonth ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'
+                                            }`}
+                                    >
+                                        <div className={`text-sm font-medium ${isToday ? 'text-[#7f1d1d] dark:text-amber-400' : ''
+                                            }`}>
+                                            {date.getDate()}
                                         </div>
-                                    );
-                                })}
-                            </div>
+                                        {dayEvents.length > 0 && (
+                                            <div className="mt-1 space-y-1">
+                                                {dayEvents.slice(0, 2).map((event, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className={`text-xs p-1 rounded-lg truncate ${event.featured
+                                                            ? 'bg-[#7f1d1d]/10 dark:bg-amber-600/20 text-[#7f1d1d] dark:text-amber-300'
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                                            }`}
+                                                    >
+                                                        {event.title}
+                                                    </div>
+                                                ))}
+                                                {dayEvents.length > 2 && (
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                        +{dayEvents.length - 2} more
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
-                    {/* Events Sidebar */}
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {selectedDate ? `Events on ${selectedDate.toLocaleDateString()}` : 'Upcoming Events'}
-                        </h3>
+                    {/* Events List */}
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                {selectedDate
+                                    ? `Events on ${selectedDate.toLocaleDateString()}`
+                                    : 'Upcoming Events (Next 5)'}
+                            </h3>
+                            {selectedDate && (
+                                <button
+                                    onClick={() => setSelectedDate(null)}
+                                    className="text-sm px-3 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-1"
+                                >
+                                    <X size={14} />
+                                    Show All
+                                </button>
+                            )}
+                        </div>
 
-                        <div className="space-y-3 max-h-125 pr-5 overflow-y-auto">
-                            {(selectedDate ? getEventsForDate(selectedDate) : filteredEvents.slice(0, 5)).map(event => (
+                        <div className="space-y-3 overflow-y-auto pr-2">
+                            {(selectedDate
+                                ? getEventsForDate(selectedDate)
+                                : [...events]
+                                    .sort((a, b) => a.date.getTime() - b.date.getTime())
+                                    .slice(0, 5)
+                            ).map(event => (
                                 <div
                                     key={event.id}
-                                    className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer"
+                                    className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer"
                                     onClick={() => setSelectedEvent(event)}
                                 >
                                     <div className="flex justify-between items-start mb-2">
-                                        <h4 className="font-medium text-gray-900 dark:text-white text-sm">{event.title}</h4>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toggleFavorite(event.id);
-                                            }}
-                                            className="text-gray-400 hover:text-red-500 transition-colors"
-                                        >
-                                            <Heart size={16} className={favorites.has(event.id) ? 'fill-red-500 text-red-500' : ''} />
-                                        </button>
+                                        <h4 className="font-medium text-gray-900 dark:text-white">{event.title}</h4>
                                     </div>
                                     <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
                                         <div className="flex items-center gap-1">
@@ -369,13 +397,10 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
                                             {event.location}
                                         </div>
                                     </div>
-                                    <div className="flex justify-between items-center mt-2">
+                                    <div className="flex justify-between items-center mt-3">
                                         <span className={`px-2 py-1 rounded-full text-xs ${getCategoryColor(event.category)}`}>
                                             {event.category}
                                         </span>
-                                        {event.featured && (
-                                            <Star size={12} className="text-[#7f1d1d] dark:text-amber-500 fill-current" />
-                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -384,7 +409,7 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
                 </div>
             ) : (
                 /* List View */
-                <div className="space-y-4 sm:px-30 mb-10">
+                <div className="space-y-4 sm:px-30 mb-10 px-5">
                     {filteredEvents.map(event => (
                         <div
                             key={event.id}
@@ -402,7 +427,7 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
                                                 {event.description}
                                             </p>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        {/* <div className="flex items-center gap-2">
                                             {event.featured && (
                                                 <Star size={20} className="text-[#7f1d1d] dark:text-amber-500 fill-current" />
                                             )}
@@ -415,7 +440,7 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
                                             >
                                                 <Heart size={20} className={favorites.has(event.id) ? 'fill-red-500 text-red-500' : ''} />
                                             </button>
-                                        </div>
+                                        </div> */}
                                     </div>
 
                                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -431,12 +456,12 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
                                             <MapPin size={16} />
                                             {event.location}
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        {/* <div className="flex items-center gap-2">
                                             <Users size={16} className={getAvailabilityColor(event.registered, event.capacity)} />
                                             <span className={`${getAvailabilityColor(event.registered, event.capacity)} font-medium`}>
                                                 {event.registered}/{event.capacity}
                                             </span>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div>
 
@@ -444,17 +469,6 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
                                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(event.category)}`}>
                                         {event.category}
                                     </span>
-                                    <div className="text-right mt-4">
-                                        {event.price > 0 ? (
-                                            <span className="text-2xl font-bold text-[#7f1d1d] dark:text-amber-400">
-                                                ₹{event.price}
-                                            </span>
-                                        ) : (
-                                            <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                                                FREE
-                                            </span>
-                                        )}
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -464,7 +478,7 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
 
             {/* Event Detail Modal */}
             {selectedEvent && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-60 p-4">
                     <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6">
                             <div className="flex justify-between items-start mb-4">
@@ -472,9 +486,9 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
                                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                                         {selectedEvent.title}
                                     </h2>
-                                    {selectedEvent.featured && (
+                                    {/* {selectedEvent.featured && (
                                         <Star size={24} className="text-[#7f1d1d] dark:text-amber-500 fill-current" />
-                                    )}
+                                    )} */}
                                 </div>
                                 <button
                                     onClick={() => setSelectedEvent(null)}
@@ -505,52 +519,37 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events: propEvents }) =
                                         <Clock size={20} className="text-[#7f1d1d] dark:text-amber-500" />
                                         <span className="text-gray-900 dark:text-white">{selectedEvent.time}</span>
                                     </div>
+
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3">
+                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(selectedEvent.category)}`}>
+                                            {selectedEvent.category}
+                                        </span>
+                                        {/* <span className="text-2xl font-bold text-[#7f1d1d] dark:text-amber-400">
+                                            {selectedEvent.price > 0 ? `₹${selectedEvent.price}` : 'FREE'}
+                                        </span> */}
+                                    </div>
                                     <div className="flex items-center gap-3">
                                         <MapPin size={20} className="text-[#7f1d1d] dark:text-amber-500" />
                                         <span className="text-gray-900 dark:text-white">{selectedEvent.location}</span>
                                     </div>
                                 </div>
-
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-3">
-                                        <Users size={20} className="text-[#7f1d1d] dark:text-amber-500" />
-                                        <div>
-                                            <span className="text-gray-900 dark:text-white">
-                                                {selectedEvent.registered}/{selectedEvent.capacity} registered
-                                            </span>
-                                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
-                                                <div
-                                                    className="bg-[#7f1d1d] dark:bg-amber-500 h-2 rounded-full"
-                                                    style={{ width: `${(selectedEvent.registered / selectedEvent.capacity) * 100}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(selectedEvent.category)}`}>
-                                            {selectedEvent.category}
-                                        </span>
-                                        <span className="text-2xl font-bold text-[#7f1d1d] dark:text-amber-400">
-                                            {selectedEvent.price > 0 ? `₹${selectedEvent.price}` : 'FREE'}
-                                        </span>
-                                    </div>
-                                </div>
                             </div>
 
-                            <div className="flex gap-3">
-                                <button className="flex-1 bg-[#7f1d1d] hover:bg-[#991b1b] dark:bg-amber-600 dark:hover:bg-amber-700 text-white py-3 px-6 rounded-lg font-medium transition-colors">
-                                    Register Now
-                                </button>
-                                <button className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                    <Share2 size={20} />
-                                </button>
+                            <div className="flex gap-3 items-center">
                                 <button
-                                    onClick={() => toggleFavorite(selectedEvent.id)}
-                                    className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                    className="flex flex-1 items-center justify-center gap-2 bg-[#7f1d1d] hover:bg-[#991b1b] dark:bg-amber-600 dark:hover:bg-amber-700 text-white py-3 px-6 rounded-lg font-medium transition-colors group"
+                                    onClick={handleShare}
+                                    onMouseEnter={() => waypointRef.current?.startAnimation()}
+                                    onMouseLeave={() => waypointRef.current?.stopAnimation()}
                                 >
-                                    <Heart size={20} className={favorites.has(selectedEvent.id) ? 'fill-red-500 text-red-500' : ''} />
+                                    <WaypointsIcon ref={waypointRef} className="w-1 h-1 mr-6 mb-6 group-hover:scale-110 transition-transform" />
+                                    <span className='text-lg'>Share Event</span>
                                 </button>
                             </div>
+
                         </div>
                     </div>
                 </div>

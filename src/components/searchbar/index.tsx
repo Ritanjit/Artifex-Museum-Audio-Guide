@@ -1,8 +1,9 @@
 // src/components/searchbar/index.tsx
-import { useState, useEffect, useMemo } from "react";
-import { Search, ScanQrCode } from "lucide-react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { ScanQrCode } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import QRScanner from "../qrScanner/QRScanner";
+import { SearchIcon, SearchIconHandle } from "../ui/search";
 
 interface FloatingSearchBarProps {
     searchQuery: string;
@@ -29,6 +30,7 @@ const FloatingSearchBar: React.FC<FloatingSearchBarProps> = ({
 }) => {
     const [showScanner, setShowScanner] = useState(false);
     const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+    const searchIconRef = useRef<SearchIconHandle>(null);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -87,7 +89,6 @@ const FloatingSearchBar: React.FC<FloatingSearchBarProps> = ({
             )
         );
 
-
         // Keep only up to 5 suggestions
         setFilteredSuggestions(suggestions.slice(0, 5));
     };
@@ -99,9 +100,15 @@ const FloatingSearchBar: React.FC<FloatingSearchBarProps> = ({
                 className="relative flex items-center bg-red-900 dark:bg-white/10 backdrop-blur-lg shadow-md 
                    shadow-black sm:border-1 sm:shadow-md rounded-full w-full sm:w-[90%] md:w-[80%] max-w-[700px] 
                    h-[50px] sm:h-[50px] md:h-[60px] p-2 pl-4 pr-10 sm:pr-16 md:pr-20"
+                onMouseEnter={() => searchIconRef.current?.startAnimation()}
+                onMouseLeave={() => searchIconRef.current?.stopAnimation()}
             >
                 {/* Search Icon */}
-                <Search className="text-white sm:text-white h-5 w-5" />
+                <SearchIcon 
+                    ref={searchIconRef} 
+                    className="text-white sm:text-white h-5 w-5" 
+                    size={20}
+                />
 
                 {/* Input Field */}
                 <input

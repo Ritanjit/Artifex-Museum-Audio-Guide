@@ -5,16 +5,13 @@ import IntroInfoCard from "@/components/Introduction/intro";
 import HomeNewsEventsHighlights from "@/components/bulletin/homeNews";
 
 const HomePage = () => {
-
   return (
-
-    <>
-      < Hero06 />
-      < IntroInfoCard />
-      < HomeCollections />
-      < HomeNewsEventsHighlights />
-    </>
-
+    <div className="w-full overflow-x-hidden">
+      <Hero06 />
+      <IntroInfoCard />
+      <HomeCollections />
+      <HomeNewsEventsHighlights />
+    </div>
   );
 };
 
