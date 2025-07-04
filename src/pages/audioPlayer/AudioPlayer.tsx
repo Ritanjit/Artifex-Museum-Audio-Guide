@@ -21,9 +21,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ artifactData = null }) => {
 
     // Use artifact data if available, otherwise use static data
     const thumbnail = artifactData?.imageUrl || staticThumbnail;
-    const englishAudio = artifactData?.english_audio_url || staticEnglishAudio;
-    const hindiAudio = artifactData?.hindi_audio_url || staticHindiAudio;
-    const assameseAudio = artifactData?.assamese_audio_url || staticAssameseAudio;
+    // const englishAudio = artifactData?.english_audio_url || staticEnglishAudio;
+    // const hindiAudio = artifactData?.hindi_audio_url || staticHindiAudio;
+    // const assameseAudio = artifactData?.assamese_audio_url || staticAssameseAudio;
+    const englishAudio = artifactData?.english_audio_url;
+    const hindiAudio = artifactData?.hindi_audio_url;
+    const assameseAudio = artifactData?.assamese_audio_url;
 
 
     const [isPlaying, setIsPlaying] = useState(false);
@@ -133,6 +136,20 @@ The Majuli Museum preserves artifacts and documents that showcase the rich histo
         }
     }, [language]);
 
+    useEffect(() => {
+        // If current language isn't available in the new artifactData, switch to first available language
+        if (artifactData) {
+            const availableLanguages = [];
+            if (artifactData.english_audio_url) availableLanguages.push('english');
+            if (artifactData.hindi_audio_url) availableLanguages.push('hindi');
+            if (artifactData.assamese_audio_url) availableLanguages.push('assamese');
+
+            if (!availableLanguages.includes(language) && availableLanguages.length > 0) {
+                setLanguage(availableLanguages[0]);
+            }
+        }
+    }, [artifactData]);
+
     const togglePlayPause = () => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -183,9 +200,19 @@ The Majuli Museum preserves artifacts and documents that showcase the rich histo
                         onChange={(e) => setLanguage(e.target.value)}
                         className="language-dropdown"
                     >
-                        <option value="english">English</option>
-                        <option value="hindi">हिंदी (Hindi)</option>
-                        <option value="assamese">অসমীয়া (Assamese)</option>
+                        {/* When artifactData is provided, only show available languages */}
+                        {artifactData ? (
+                            <>
+                                {artifactData.english_audio_url && <option value="english">English</option>}
+                                {artifactData.hindi_audio_url && <option value="hindi">हिंदी (Hindi)</option>}
+                                {artifactData.assamese_audio_url && <option value="assamese">অসমীয়া (Assamese)</option>}
+                            </>
+                        ) : (
+                            /* When no artifactData */
+                            <>
+                                <option>No Audios Found!</option>
+                            </>
+                        )}
                     </select>
                 </div>
 

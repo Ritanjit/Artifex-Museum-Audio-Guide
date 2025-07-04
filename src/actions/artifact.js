@@ -1,4 +1,4 @@
-// src\actions\upload.js
+// src\actions\artifact.js
 import Api from "@/apis/Api";
 
 /**

@@ -19,6 +19,7 @@ import { PanelLeftCloseIcon } from "../ui/panelClose";
 import { HomeIcon } from "../../components/ui/home";
 import AdminVisitorCounter from "../visitorCounter/AdminVisitorCounter";
 import { useTheme } from "@/components/theme-provider/theme-provider";
+import { Tooltip } from "../ui/Tooltip";
 
 const tabs = [
   { name: "Home", icon: <HomeIcon size={20} />, path: "/admin", primary: true },
@@ -64,24 +65,25 @@ const AdminSidebar = () => {
             {tabs.map((tab, idx) => {
               const isActive = location.pathname === tab.path;
               return (
-                <Link
-                  key={idx}
-                  to={tab.path}
-                  className={`flex items-center gap-3 px-4 py-3 hover:bg-red-950/60 transition ${isActive ? "bg-red-950/60 border-l-4 border-white" : ""
-                    }`}
-                >
-                  <div className={`${isActive ? "text-white" : "text-white"}`}>
-                    {tab.icon}
-                  </div>
-                  {isOpen && (
-                    <span
-                      className={`text-sm font-medium ${isActive ? "text-white" : "text-white"
-                        }`}
-                    >
-                      {tab.name}
-                    </span>
-                  )}
-                </Link>
+                <Tooltip key={idx} content={tab.name} position="right">
+                  <Link
+                    to={tab.path}
+                    className={`flex items-center gap-3 px-4 py-3 hover:bg-red-950/60 transition ${isActive ? "bg-red-950/60 border-l-4 border-white" : ""
+                      }`}
+                  >
+                    <div className={`${isActive ? "text-white" : "text-white"}`}>
+                      {tab.icon}
+                    </div>
+                    {isOpen && (
+                      <span
+                        className={`text-sm font-medium ${isActive ? "text-white" : "text-white"
+                          }`}
+                      >
+                        {tab.name}
+                      </span>
+                    )}
+                  </Link>
+                </Tooltip>
               );
             })}
           </nav>

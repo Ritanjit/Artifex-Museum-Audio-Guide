@@ -1,3 +1,4 @@
+// src\components\dashboard\dashboard.tsx
 import React, { useState, useEffect } from "react";
 import {
     BarChart,
@@ -16,6 +17,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Star, Users, MessageSquare, BarChart2, CalendarIcon } from "lucide-react";
 import { getAllFeedback } from "@/actions/feedback";
 import { useVisitorCounter } from "@/lib/contexts/VisitorCounterContext";
+import { getVisitorHistory } from "@/apis/visitorApi";
 
 // Fixed hardcoded data structure
 const data = {
@@ -89,6 +91,54 @@ const Dashboard = () => {
     const [feedbacks, setFeedbacks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const [visitorHistory, setVisitorHistory] = useState<any[]>([]);
+    const [historyLoading, setHistoryLoading] = useState(true);
+
+    // Fetch visitor history from FrontQL
+    useEffect(() => {
+        const fetchVisitorHistory = async () => {
+            try {
+                const history = await getVisitorHistory(view);
+
+                // Improved aggregation logic
+                const aggregatedHistory = history.reduce((acc: Record<string, any>, item) => {
+                    let key;
+                    if (view === 'year') {
+                        // Parse date to get month name
+                        const dateParts = item.date.split('-');
+                        if (dateParts.length === 3) {
+                            const [year, month] = dateParts;
+                            const dateObj = new Date(`${year}-${month}-01`);
+                            key = dateObj.toLocaleString('default', { month: 'short' });
+                        } else {
+                            // Fallback to date if format is unexpected
+                            key = item.date;
+                        }
+                    } else {
+                        key = item.date;
+                    }
+
+                    if (!acc[key]) {
+                        acc[key] = {
+                            ...item,
+                            count: 0
+                        };
+                    }
+                    acc[key].count += Number(item.count);
+                    return acc;
+                }, {});
+
+                setVisitorHistory(Object.values(aggregatedHistory));
+            } catch (error) {
+                console.error("Error fetching visitor history:", error);
+            } finally {
+                setHistoryLoading(false);
+            }
+        };
+
+        fetchVisitorHistory();
+    }, [view]);
+
     // Fetch feedback data from FrontQL
     useEffect(() => {
         const fetchFeedback = async () => {
@@ -131,48 +181,148 @@ const Dashboard = () => {
         fill: ["#f87171", "#fb923c", "#facc15", "#4ade80", "#22d3ee"][index]
     }));
 
-    // For bar chart - use hardcoded visitors but real feedback counts
-    const chartData = {
-        week: data.week.map((day, index) => {
-            // Calculate average rating for this day's feedbacks
-            const dayRatings = feedbacks.slice(index * 10, (index + 1) * 10);
-            const dayAvgRating = dayRatings.length > 0
-                ? dayRatings.reduce((sum, f) => sum + (Number(f.rating)) || 0, 0) / dayRatings.length
-                : 0;
+    // // For bar chart - use hardcoded visitors but real feedback counts
+    // const chartData = {
+    //     week: data.week.map((day, index) => {
+    //         // Calculate average rating for this day's feedbacks
+    //         const dayRatings = feedbacks.slice(index * 10, (index + 1) * 10);
+    //         const dayAvgRating = dayRatings.length > 0
+    //             ? dayRatings.reduce((sum, f) => sum + (Number(f.rating)) || 0, 0) / dayRatings.length
+    //             : 0;
 
-            return {
-                ...day,
-                feedbacks: dayRatings.length,
-                avgRating: dayAvgRating
-            };
-        }),
-        month: data.month.map((day, index) => {
-            // Group feedbacks by "day"
-            const dayRatings = feedbacks.slice(index * 3, (index + 1) * 3);
-            const dayAvgRating = dayRatings.length > 0
-                ? dayRatings.reduce((sum, f) => sum + (Number(f.rating)) || 0, 0) / dayRatings.length
-                : 0;
+    //         return {
+    //             ...day,
+    //             feedbacks: dayRatings.length,
+    //             avgRating: dayAvgRating
+    //         };
+    //     }),
+    //     month: data.month.map((day, index) => {
+    //         // Group feedbacks by "day"
+    //         const dayRatings = feedbacks.slice(index * 3, (index + 1) * 3);
+    //         const dayAvgRating = dayRatings.length > 0
+    //             ? dayRatings.reduce((sum, f) => sum + (Number(f.rating)) || 0, 0) / dayRatings.length
+    //             : 0;
 
-            return {
-                ...day,
-                feedbacks: dayRatings.length,
-                avgRating: dayAvgRating
-            };
-        }),
-        year: data.year.map((month, index) => {
-            // Group feedbacks by "month"
-            const monthRatings = feedbacks.slice(index * 100, (index + 1) * 100);
-            const monthAvgRating = monthRatings.length > 0
-                ? monthRatings.reduce((sum, f) => sum + (Number(f.rating)) || 0, 0) / monthRatings.length
-                : 0;
+    //         return {
+    //             ...day,
+    //             feedbacks: dayRatings.length,
+    //             avgRating: dayAvgRating
+    //         };
+    //     }),
+    //     year: data.year.map((month, index) => {
+    //         // Group feedbacks by "month"
+    //         const monthRatings = feedbacks.slice(index * 100, (index + 1) * 100);
+    //         const monthAvgRating = monthRatings.length > 0
+    //             ? monthRatings.reduce((sum, f) => sum + (Number(f.rating)) || 0, 0) / monthRatings.length
+    //             : 0;
 
-            return {
-                ...month,
-                feedbacks: monthRatings.length,
-                avgRating: monthAvgRating
-            };
-        })
+    //         return {
+    //             ...month,
+    //             feedbacks: monthRatings.length,
+    //             avgRating: monthAvgRating
+    //         };
+    //     })
+    // };
+
+    /// Calculate chart data using real visitor history and feedback tables
+    const getChartData = () => {
+        if (historyLoading || !visitorHistory.length) {
+            return data[view]; // Fallback to sample data
+        }
+
+        // Create a map for quick lookup of visitor counts
+        const visitorMap = new Map();
+        visitorHistory.forEach(item => {
+            if (view === 'year') {
+                // Use month name as key
+                visitorMap.set(item.month || item.date, item.count);
+            } else {
+                // Use date string as key
+                visitorMap.set(item.date, item.count);
+            }
+        });
+
+        switch (view) {
+            case 'week':
+                // Create array for last 7 days
+                return Array(7).fill(null).map((_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - 6 + i);
+                    const dateStr = formatDate(date);
+                    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+
+                    // Get feedback data for this day
+                    const dayRatings = feedbacks.slice(i * 10, (i + 1) * 10);
+                    const dayAvgRating = dayRatings.length > 0
+                        ? dayRatings.reduce((sum, f) => sum + (Number(f.rating) || 0), 0) / dayRatings.length
+                        : 0;
+
+                    return {
+                        day: dayName,
+                        visitors: visitorMap.get(dateStr) || 0,
+                        feedbacks: dayRatings.length,
+                        avgRating: dayAvgRating
+                    };
+                });
+
+            case 'month':
+                // Create array for last 30 days
+                return Array(30).fill(null).map((_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - 29 + i);
+                    const dateStr = formatDate(date);
+                    const dayNum = date.getDate();
+
+                    // Get feedback data for this day
+                    const dayRatings = feedbacks.slice(i * 3, (i + 1) * 3);
+                    const dayAvgRating = dayRatings.length > 0
+                        ? dayRatings.reduce((sum, f) => sum + (Number(f.rating) || 0), 0) / dayRatings.length
+                        : 0;
+
+                    return {
+                        day: `Day ${dayNum}`,
+                        visitors: visitorMap.get(dateStr) || 0,
+                        feedbacks: dayRatings.length,
+                        avgRating: dayAvgRating
+                    };
+                });
+
+            case 'year':
+                // Create array for last 12 months
+                return Array(12).fill(null).map((_, i) => {
+                    const date = new Date();
+                    date.setMonth(date.getMonth() - 11 + i);
+                    const monthName = date.toLocaleString('default', { month: 'short' });
+
+                    // Get feedback data for this month
+                    const monthRatings = feedbacks.slice(i * 100, (i + 1) * 100);
+                    const monthAvgRating = monthRatings.length > 0
+                        ? monthRatings.reduce((sum, f) => sum + (Number(f.rating) || 0), 0) / monthRatings.length
+                        : 0;
+
+                    return {
+                        month: monthName,
+                        // Use month name to get visitor count
+                        visitors: visitorMap.get(monthName) || 0,
+                        feedbacks: monthRatings.length,
+                        avgRating: monthAvgRating
+                    };
+                });
+
+            default:
+                return data[view];
+        }
     };
+
+    // Helper function to format date as YYYY-MM-DD
+    const formatDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const chartData = getChartData();
 
     if (loading) {
         return (
@@ -222,42 +372,44 @@ const Dashboard = () => {
 
                 {/* Average Rating Card - Using real data */}
                 <Card className="bg-white/60 backdrop-blur-lg border border-gray-200 shadow-md rounded-2xl 
-                hover:shadow-xl transition-all duration-300 group cursor-pointer">
-                    <CardContent className="p-4 mt-5 ml-15 flex items-center gap-4 relative">
-                        <div className="flex flex-col justify-center">
-                            <p className="text-sm text-gray-500">Average Rating</p>
-                            <div className="flex items-center space-x-2 group-hover:scale-105 transition-all">
-                                <p className="text-3xl font-semibold text-gray-800">
-                                    {averageRating.toFixed(1)}
-                                </p>
-                                <Star className="text-yellow-500" fill="currentColor" size={24} />
+hover:shadow-xl transition-all duration-300 group cursor-pointer">
+                    <CardContent className="p-4 h-full flex flex-col sm:flex-row justify-center items-center gap-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <div className="text-center sm:text-left">
+                                <p className="text-sm text-gray-500">Average Rating</p>
+                                <div className="flex items-center justify-center sm:justify-start space-x-2 group-hover:scale-105 transition-all">
+                                    <p className="text-3xl font-semibold text-gray-800">
+                                        {averageRating.toFixed(1)}
+                                    </p>
+                                    <Star className="text-yellow-500" fill="currentColor" size={24} />
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Chart with real data */}
-                        <div className="relative w-[100px] h-[100px] group-hover:scale-110 transition-all sm:block hidden">
-                            <RadialBarChart
-                                width={100}
-                                height={100}
-                                innerRadius="40%"
-                                outerRadius="120%"
-                                data={radialChartData}
-                                startAngle={0}
-                                endAngle={360}
-                            >
-                                <PolarAngleAxis type="number" domain={[0, 250]} angleAxisId={0} tick={false} />
-                                <RadialBar background dataKey="count" />
-                                <Legend
-                                    iconSize={10}
-                                    layout="vertical"
-                                    verticalAlign="middle"
-                                    wrapperStyle={{
-                                        color: "#6b7280",
-                                        fontSize: "0.75rem",
-                                        right: "-50px",
-                                    }}
-                                />
-                            </RadialBarChart>
+                            {/* Chart with real data */}
+                            <div className="relative w-[100px] h-[100px] group-hover:scale-110 transition-all sm:ml-0 mr-10">
+                                <RadialBarChart
+                                    width={100}
+                                    height={100}
+                                    innerRadius="40%"
+                                    outerRadius="120%"
+                                    data={radialChartData}
+                                    startAngle={0}
+                                    endAngle={360}
+                                >
+                                    <PolarAngleAxis type="number" domain={[0, 250]} angleAxisId={0} tick={false} />
+                                    <RadialBar background dataKey="count" />
+                                    <Legend
+                                        iconSize={10}
+                                        layout="vertical"
+                                        verticalAlign="middle"
+                                        wrapperStyle={{
+                                            color: "#6b7280",
+                                            fontSize: "0.75rem",
+                                            right: "-50px",
+                                        }}
+                                    />
+                                </RadialBarChart>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -354,7 +506,7 @@ const Dashboard = () => {
             hover:shadow-2xl transition-all duration-300">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                        data={chartData[view]}
+                        data={chartData}
                         margin={{ top: 20, right: 30, left: 10, bottom: 10 }}
                         barGap={6}
                     >

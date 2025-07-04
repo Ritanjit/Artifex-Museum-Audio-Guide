@@ -38,14 +38,14 @@ const NewsAdmin: React.FC = () => {
         date: new Date()
     });
 
-    const categories = [
+const categories = [
         { value: 'all', label: 'All Categories', color: 'bg-gray-100 dark:bg-gray-700' },
-        { value: 'discovery', label: 'Discoveries', color: 'bg-emerald-100 dark:bg-emerald-900/30' },
+        { value: 'achievements', label: 'Achievements', color: 'bg-emerald-100 dark:bg-emerald-900/30' },
         { value: 'exhibition', label: 'Exhibitions', color: 'bg-blue-100 dark:bg-blue-900/30' },
         { value: 'workshop', label: 'Workshops', color: 'bg-purple-100 dark:bg-purple-900/30' },
         { value: 'cultural', label: 'Cultural', color: 'bg-orange-100 dark:bg-orange-900/30' },
-        { value: 'research', label: 'Research', color: 'bg-cyan-100 dark:bg-cyan-900/30' }
-    ];
+        { value: 'lastest news', label: 'Latest News', color: 'bg-cyan-100 dark:bg-cyan-900/30' },
+    ];
 
     // Fetch news from API
     useEffect(() => {

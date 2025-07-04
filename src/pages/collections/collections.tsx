@@ -175,12 +175,10 @@ const Collections: React.FC = () => {
                       key={item.name}
                       onClick={(e) => {
                         e.preventDefault();
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-
-                        // Always navigate to audio player with artifact ID
-                        setTimeout(() => {
-                          navigate(`/audioplayer/${item.id}`);
-                        }, 300);
+                        // Navigate first, then scroll after navigation is complete
+                        navigate(`/audioplayer/${item.id}`, {
+                          state: { shouldScroll: true } // Optional: pass state to handle scroll in target component
+                        });
                       }}
                       className="block cursor-pointer"
                     >

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { getAllNews } from '@/actions/news';
 import { getAllEvents } from '@/actions/events';
+import { useNavigate } from 'react-router';
 
 interface NewsItem {
     id: string;
@@ -38,6 +39,7 @@ interface Event {
 }
 
 const HomeNewsEventsHighlights: React.FC = () => {
+    const navigate = useNavigate();
     const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
     const [currentEventIndex, setCurrentEventIndex] = useState(0);
     const [isNewsPlaying, setIsNewsPlaying] = useState(true);
@@ -233,7 +235,9 @@ const HomeNewsEventsHighlights: React.FC = () => {
                                                 </h4>
 
                                                 <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                                                    {currentNews.excerpt}
+                                                    {currentNews.excerpt.length > 100
+                                                        ? `${currentNews.excerpt.substring(0, 100)}...`
+                                                        : currentNews.excerpt}
                                                 </p>
 
                                                 <div className="flex items-center justify-between">
@@ -265,7 +269,12 @@ const HomeNewsEventsHighlights: React.FC = () => {
 
                                 {/* View All News Button */}
                                 <div className="px-6 pb-6">
-                                    <button className="w-full flex items-center justify-center gap-2 py-3 border-2 border-[#7f1d1d] dark:border-amber-500 text-[#7f1d1d] dark:text-amber-500 rounded-lg hover:bg-[#7f1d1d] hover:text-white dark:hover:bg-amber-500 dark:hover:text-white transition-colors">
+                                    <button className="w-full flex items-center justify-center gap-2 py-3 border-2 border-[#7f1d1d] dark:border-amber-500 text-[#7f1d1d] dark:text-amber-500 rounded-lg hover:bg-[#7f1d1d] hover:text-white dark:hover:bg-amber-500 dark:hover:text-white transition-colors"
+                                        onClick={() => {
+                                            navigate("/news");
+                                            window.scrollTo({ top: 0, behavior: "smooth" });
+                                        }}
+                                    >
                                         View All News
                                         <ExternalLink className="w-4 h-4" />
                                     </button>
@@ -315,7 +324,9 @@ const HomeNewsEventsHighlights: React.FC = () => {
                                                 </h4>
 
                                                 <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                                                    {currentEvent.description}
+                                                    {currentEvent.description.length > 100
+                                                        ? `${currentEvent.description.substring(0, 100)}...`
+                                                        : currentEvent.description}
                                                 </p>
 
                                                 <div className="mb-4 flex items-center gap-5">
@@ -355,9 +366,14 @@ const HomeNewsEventsHighlights: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Register & View All Events Buttons */}
+                                {/* View All Events Buttons */}
                                 <div className="px-6 pb-6 space-y-3">
-                                    <button className="w-full flex items-center justify-center gap-2 py-3 border-2 border-[#7f1d1d] dark:border-amber-500 text-[#7f1d1d] dark:text-amber-500 rounded-lg hover:bg-[#7f1d1d] hover:text-white dark:hover:bg-amber-500 dark:hover:text-white transition-colors">
+                                    <button className="w-full flex items-center justify-center gap-2 py-3 border-2 border-[#7f1d1d] dark:border-amber-500 text-[#7f1d1d] dark:text-amber-500 rounded-lg hover:bg-[#7f1d1d] hover:text-white dark:hover:bg-amber-500 dark:hover:text-white transition-colors"
+                                        onClick={() => {
+                                            navigate("/events");
+                                            window.scrollTo({ top: 0, behavior: "smooth" });
+                                        }}
+                                    >
                                         View All Events
                                         <ExternalLink className="w-4 h-4" />
                                     </button>

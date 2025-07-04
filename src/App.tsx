@@ -1,5 +1,5 @@
 // src\App.tsx
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
 import { ThemeProvider } from "@/components/theme-provider/theme-provider";
 import HomePage from "@/pages/home";
 import AboutPage from "@/pages/about";
@@ -36,6 +36,7 @@ import InteractiveMuseumMap from "./components/map/map";
 import NewsAdmin from "./components/dashboard/newsAdmin";
 import ContactAdmin from "./components/dashboard/contactAdmin";
 import "react-toastify/dist/ReactToastify.css";
+import NotFound from "./pages/PageNotFound/PageNotFound";
 
 function App() {
 
@@ -65,6 +66,11 @@ function App() {
 						<Route path="questionnaire" element={<Questionnaire />} />
 						<Route path="certificate" element={<Certificate />} />
 						<Route path="map" element={<InteractiveMuseumMap />} />
+						<Route path="pageNotFound" element={<NotFound />} />
+
+						{/* Redirect all unmatched paths to NotFound */}
+						<Route path="*" element={<Navigate to="/pageNotFound" replace />} />
+
 					</Route>
 
 					{/* Auth-only layout routes */}
@@ -91,8 +97,15 @@ function App() {
 							<Route path="uploadManager" element={<UploadManager />} />
 							<Route path="artifactManager" element={<ArtifactManager />} />
 							<Route path="contactAdmin" element={<ContactAdmin />} />
+
+							{/* Admin-specific 404 */}
+							<Route path="*" element={<Navigate to="/admin" replace />} />
+
 						</Route>
 					</Route>
+
+					{/* Catch-all route for paths that don't match any route */}
+					<Route path="*" element={<Navigate to="/pageNotFound" replace />} />
 
 				</Routes>
 			</Router>

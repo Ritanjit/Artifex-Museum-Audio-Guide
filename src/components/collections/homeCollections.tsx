@@ -1,8 +1,8 @@
+// src\components\collections\homeCollections.tsx
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { getCollections } from "@/actions/collections";
-import "./homeCollections.css";
+import { useNavigate } from "react-router-dom";
 import { getAllArtifacts } from "@/actions/artifact";
+import "./homeCollections.css";
 
 interface CollectionItem {
   id: string;
@@ -10,6 +10,9 @@ interface CollectionItem {
   category: string;
   keywords: string[];
   imageUrl: string;
+  english_audio_url?: string;
+  hindi_audio_url?: string;
+  assamese_audio_url?: string;
 }
 
 const HomeCollections: React.FC = () => {
@@ -25,12 +28,13 @@ const HomeCollections: React.FC = () => {
       try {
         setIsLoading(true);
         const data = await getAllArtifacts();
-        // Filter to only show Satras category with at least 5 items
-        const satrasCollections = data.filter(item =>
-          item.category === "Satras" && item.imageUrl
-        ).slice(0, 10); // Limit to 10 items for carousel
 
-        setCollections(satrasCollections);
+        // Filter to only show items with images and limit to 20
+        const allCollections = data
+          .filter(item => item.imageUrl)
+          .slice(0, 20); // Limit to 20 items for carousel
+
+        setCollections(allCollections);
         setError(false);
       } catch (err) {
         console.error("Error fetching collections:", err);
@@ -78,7 +82,8 @@ const HomeCollections: React.FC = () => {
         <div className="w-full max-w-7xl mx-auto">
           <h2 className="text-4xl sm:text-5xl font-bold">EXPLORE OUR COLLECTIONS</h2>
           <div className="text-sm sm:text-lg pr-2 sm:pr-0 mt-6 sm:mt-8 font-bold text-gray-400">
-            Loading...
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mb-4"></div>
+            Loading Collections...
           </div>
         </div>
         <div className="flex justify-center items-center h-64">
@@ -109,7 +114,7 @@ const HomeCollections: React.FC = () => {
           <button
             onClick={() => {
               navigate("/collections");
-              window.scrollTo({ top: 0, behavior: "instant" });
+              window.scrollTo({ top: 0, behavior: "smooth" });
             }}
             className="text-sm sm:text-lg pr-2 sm:pr-0 mt-6 sm:mt-8 font-bold text-red-900 hover:text-amber-500 
             dark:text-gray-300 dark:hover:text-white underline cursor-pointer"
@@ -134,7 +139,7 @@ const HomeCollections: React.FC = () => {
             window.scrollTo({ top: 0, behavior: "instant" });
           }}
           className="text-xs sm:text-sm md:text-lg pr-0 sm:pr-2 mt-0 sm:mt-6 md:mt-8 font-bold text-red-900 hover:text-amber-500 
-      dark:text-gray-300 dark:hover:text-white underline cursor-pointer"
+          dark:text-gray-300 dark:hover:text-white underline cursor-pointer"
         >
           View More
         </button>
@@ -146,22 +151,25 @@ const HomeCollections: React.FC = () => {
         className="scroll-container overflow-x-auto no-scrollbar flex gap-3 sm:gap-4 snap-x snap-mandatory"
       >
         {collections.map((item) => (
-          <Link
-            to={`/audioplayer`}
+          <div
             key={item.id}
-            className="min-w-[160px] sm:min-w-[220px] md:min-w-[240px] lg:min-w-[260px] snap-start flex-none" // Added flex-none
-            onClick={() => {
-              window.scrollTo({ top: 0, behavior: "instant" });
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              setTimeout(() => {
+                navigate(`/audioplayer/${item.id}`);
+              }, 300);
             }}
+            className="min-w-[160px] sm:min-w-[220px] md:min-w-[240px] lg:min-w-[260px] snap-start flex-none block cursor-pointer"
           >
             <div className="relative group rounded-xl sm:rounded-2xl overflow-hidden h-[200px] sm:h-[280px] md:h-[300px] lg:h-[340px] w-full aspect-[3/4] shadow-md 
-          hover:shadow-lg transition duration-500 fade-in">
+              hover:shadow-lg transition duration-500 fade-in">
               {item.imageUrl ? (
                 <img
                   src={item.imageUrl}
                   alt={item.name}
                   className="absolute inset-0 w-full h-full object-cover rounded-lg sm:rounded-xl transition-all 
-                duration-500 ease-in-out transform group-hover:scale-105"
+                  duration-500 ease-in-out transform group-hover:scale-105"
                 />
               ) : (
                 <div className="absolute inset-0 bg-gray-200 dark:bg-zinc-800 border border-dashed rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -170,20 +178,20 @@ const HomeCollections: React.FC = () => {
               )}
 
               <div className="absolute z-10 bottom-2 sm:bottom-3 left-0 mx-1 sm:mx-2 p-1 sm:p-2 bg-red-900 dark:bg-white/60 
-              backdrop-blur-lg w-[calc(100%-8px)] sm:w-[calc(100%-16px)] border border-white dark:border-black
-              rounded-md sm:rounded-lg shadow-sm shadow-transparent transition-all duration-500
-              group-hover:shadow-indigo-200 dark:group-hover:bg-amber-500">
+                backdrop-blur-lg w-[calc(100%-8px)] sm:w-[calc(100%-16px)] border border-white dark:border-black
+                rounded-md sm:rounded-lg shadow-sm shadow-transparent transition-all duration-500
+                group-hover:shadow-indigo-200 dark:group-hover:bg-amber-500">
                 <h6 className="font-semibold text-xs sm:text-sm leading-5 sm:leading-6 text-white group-hover:text-amber-500
-              dark:text-black text-center">
+                  dark:text-black text-center">
                   {item.name}
                 </h6>
                 <p className="text-[10px] xs:text-xs leading-4 sm:leading-5 text-gray-200 dark:text-gray-800 text-center 
-              group-hover:text-amber-500/80">
-                  Satra Collections
+                  group-hover:text-amber-500/80">
+                  {item.category} Collection
                 </p>
               </div>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
 
