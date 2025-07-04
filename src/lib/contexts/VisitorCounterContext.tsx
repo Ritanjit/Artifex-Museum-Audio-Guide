@@ -1,6 +1,6 @@
 // src\lib\contexts\VisitorCounterContext.tsx
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
-import { getVisitorCount, incrementVisitorCount, updateVisitorHistory } from "@/apis/visitorApi";
+import { getVisitorCount, incrementVisitorCount, updateVisitorHistory } from "@/actions/visitorApi";
 
 
 interface VisitorContextProps {

@@ -17,7 +17,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Star, Users, MessageSquare, BarChart2, CalendarIcon } from "lucide-react";
 import { getAllFeedback } from "@/actions/feedback";
 import { useVisitorCounter } from "@/lib/contexts/VisitorCounterContext";
-import { getVisitorHistory } from "@/apis/visitorApi";
+import { getVisitorHistory } from "@/actions/visitorApi";
 
 // Fixed hardcoded data structure
 const data = {
